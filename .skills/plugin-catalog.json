@@ -1,0 +1,225 @@
+{
+  "schema_version": 1,
+  "skills": [
+    {
+      "visible_name": "figma:figma-code-connect",
+      "frontmatter_description": "Creates and maintains Figma Code Connect template files that map Figma components to code snippets. Use when the user mentions Code Connect, Figma component mapping, design-to-code translation, or asks to create/update .figma.ts or .figma.js files.",
+      "plugin_id": "figma",
+      "plugin_family": "openai-curated-remote",
+      "installed_version": "2.0.21",
+      "resolved_skill_md": "C:/Users/picom/AppData/Roaming/orca/codex-runtime-home/home/plugins/cache/openai-curated-remote/figma/2.0.21/skills/figma-code-connect/SKILL.md",
+      "resolver_glob": "C:/Users/picom/AppData/Roaming/orca/codex-runtime-home/home/plugins/cache/openai-curated-remote/figma/*/skills/figma-code-connect/SKILL.md",
+      "sha256": "87af3996edb167d6aa3c044cb1bbb6a0d8e2d631c731bb896b1e1e8669640415",
+      "enabled_in_model_catalog": false
+    },
+    {
+      "visible_name": "figma:figma-create-new-file",
+      "frontmatter_description": "**MANDATORY prerequisite** — you MUST invoke this skill BEFORE every `create_new_file` tool call. NEVER call `create_new_file` directly without loading this skill first. Trigger whenever the user wants a new blank Figma file — a new design, FigJam, or Slides file — or when you need a fresh file before calling `use_figma`. Usage — /figma-create-new-file [editorType] [fileName] (e.g. /figma-create-new-file figjam My Whiteboard, /figma-create-new-file slides Q3 Review)",
+      "plugin_id": "figma",
+      "plugin_family": "openai-curated-remote",
+      "installed_version": "2.0.21",
+      "resolved_skill_md": "C:/Users/picom/AppData/Roaming/orca/codex-runtime-home/home/plugins/cache/openai-curated-remote/figma/2.0.21/skills/figma-create-new-file/SKILL.md",
+      "resolver_glob": "C:/Users/picom/AppData/Roaming/orca/codex-runtime-home/home/plugins/cache/openai-curated-remote/figma/*/skills/figma-create-new-file/SKILL.md",
+      "sha256": "82e0a018692d3d009b5d2c83ecce9203a4ce7dfbdb98b7b13a4f7e5b11832bc2",
+      "enabled_in_model_catalog": false
+    },
+    {
+      "visible_name": "figma:figma-design-to-code",
+      "frontmatter_description": "**MANDATORY prerequisite** — you MUST invoke this skill BEFORE calling the `get_design_context` Figma MCP tool. You MUST trigger this skill whenever the user wants to implement, build, port, or code up a Figma design as code. Example prompts (not exhaustive) are 'implement this Figma design', 'build this screen from Figma', 'turn this Figma into code', 'design to code'. This skill provides critical instructions and steps to the agent on how to correctly implement Figma designs in code and must NOT be skipped.",
+      "plugin_id": "figma",
+      "plugin_family": "openai-curated-remote",
+      "installed_version": "2.0.21",
+      "resolved_skill_md": "C:/Users/picom/AppData/Roaming/orca/codex-runtime-home/home/plugins/cache/openai-curated-remote/figma/2.0.21/skills/figma-design-to-code/SKILL.md",
+      "resolver_glob": "C:/Users/picom/AppData/Roaming/orca/codex-runtime-home/home/plugins/cache/openai-curated-remote/figma/*/skills/figma-design-to-code/SKILL.md",
+      "sha256": "936bbe68b4731d4a8748db15f85247efde232c8ae0902857c2c79a9ed40649ea",
+      "enabled_in_model_catalog": false
+    },
+    {
+      "visible_name": "figma:figma-generate-design",
+      "frontmatter_description": "Use this skill alongside figma-use when the task involves translating an application page, view, or multi-section layout into Figma. Triggers: 'write to Figma', 'create in Figma from code', 'push page to Figma', 'take this app/page and build it in Figma', 'create a screen', 'build a landing page in Figma', 'update the Figma screen to match code', 'convert this modal/dialog/drawer/panel to Figma'. This is the preferred workflow skill whenever the user wants to build or update a full page, modal, dialog, drawer, sidebar, panel, or any composed multi-section view in Figma from code or a description. Discovers design system components, variables, and styles from Code Connect files, existing screens, and library search, then imports them and assembles views incrementally section-by-section using design system tokens instead of hardcoded values.",
+      "plugin_id": "figma",
+      "plugin_family": "openai-curated-remote",
+      "installed_version": "2.0.21",
+      "resolved_skill_md": "C:/Users/picom/AppData/Roaming/orca/codex-runtime-home/home/plugins/cache/openai-curated-remote/figma/2.0.21/skills/figma-generate-design/SKILL.md",
+      "resolver_glob": "C:/Users/picom/AppData/Roaming/orca/codex-runtime-home/home/plugins/cache/openai-curated-remote/figma/*/skills/figma-generate-design/SKILL.md",
+      "sha256": "4585464c09bed50215151e468ab8476848adcf56da017811ddcbfff199ee0b56",
+      "enabled_in_model_catalog": false
+    },
+    {
+      "visible_name": "figma:figma-generate-diagram",
+      "frontmatter_description": "MANDATORY prerequisite — load this skill BEFORE every `generate_diagram` tool call. NEVER call `generate_diagram` directly without loading this skill first. Trigger whenever the user asks to create, generate, draw, render, sketch, or build a diagram — flowchart, architecture diagram, sequence diagram, ERD or entity-relationship diagram, state diagram or state machine, gantt chart, or timeline. Also trigger when the user mentions Mermaid syntax or wants a system architecture, decision tree, dependency graph, API call flow, auth handshake, schema, or pipeline visualized in FigJam. Routes to type-specific guidance, sets universal Mermaid constraints, and tells you when to use a different diagram type or skip the tool entirely (mindmaps, pie charts, class diagrams, etc.).",
+      "plugin_id": "figma",
+      "plugin_family": "openai-curated-remote",
+      "installed_version": "2.0.21",
+      "resolved_skill_md": "C:/Users/picom/AppData/Roaming/orca/codex-runtime-home/home/plugins/cache/openai-curated-remote/figma/2.0.21/skills/figma-generate-diagram/SKILL.md",
+      "resolver_glob": "C:/Users/picom/AppData/Roaming/orca/codex-runtime-home/home/plugins/cache/openai-curated-remote/figma/*/skills/figma-generate-diagram/SKILL.md",
+      "sha256": "7297638dbf2130d1b37bfd85df65d290a4dd0b11a11b54abafcf7d07565922b5",
+      "enabled_in_model_catalog": false
+    },
+    {
+      "visible_name": "figma:figma-generate-library",
+      "frontmatter_description": "Build or update a professional-grade design system in Figma from a codebase. Use when the user wants to create variables/tokens, build component libraries, create individual components with proper variant sets and variable bindings, set up theming (light/dark modes), document foundations, or reconcile gaps between code and Figma. Also use when the user asks to create or generate any component in Figma — even a single one — since components require proper variable foundations, variant states, and design token bindings to be production-quality. This skill teaches WHAT to build and in WHAT ORDER — it complements the `figma-use` skill which teaches HOW to call the Plugin API. Both skills should be loaded together.",
+      "plugin_id": "figma",
+      "plugin_family": "openai-curated-remote",
+      "installed_version": "2.0.21",
+      "resolved_skill_md": "C:/Users/picom/AppData/Roaming/orca/codex-runtime-home/home/plugins/cache/openai-curated-remote/figma/2.0.21/skills/figma-generate-library/SKILL.md",
+      "resolver_glob": "C:/Users/picom/AppData/Roaming/orca/codex-runtime-home/home/plugins/cache/openai-curated-remote/figma/*/skills/figma-generate-library/SKILL.md",
+      "sha256": "3c995d483bbf4761392ba0c2e00df2b1b1c632cc05c6e7df57a2e89c311f53b7",
+      "enabled_in_model_catalog": false
+    },
+    {
+      "visible_name": "figma:figma-implement-motion",
+      "frontmatter_description": "Translates Figma motion and animations into production-ready application code. Use when implementing animation/motion from a Figma design — user mentions \"implement this motion\", \"add animation from Figma\", \"animate this component\", provides a Figma URL whose node is animated, or when `get_design_context` returns motion data or instructs you to call `get_motion_context`.",
+      "plugin_id": "figma",
+      "plugin_family": "openai-curated-remote",
+      "installed_version": "2.0.21",
+      "resolved_skill_md": "C:/Users/picom/AppData/Roaming/orca/codex-runtime-home/home/plugins/cache/openai-curated-remote/figma/2.0.21/skills/figma-implement-motion/SKILL.md",
+      "resolver_glob": "C:/Users/picom/AppData/Roaming/orca/codex-runtime-home/home/plugins/cache/openai-curated-remote/figma/*/skills/figma-implement-motion/SKILL.md",
+      "sha256": "2e26e67284d47c6a74aedf9dca7543f4c8817dafc59a11abb156d4f7feedb2c2",
+      "enabled_in_model_catalog": false
+    },
+    {
+      "visible_name": "figma:figma-swiftui",
+      "frontmatter_description": "SwiftUI ↔ Figma translation. Use whenever the user mentions Swift, SwiftUI, iOS, iPhone, or iPad — in EITHER direction — translating a Figma design into SwiftUI (design → code), or pushing SwiftUI views / screens / tokens back into a Figma file (code → design). Triggers on phrases like 'implement this Figma design in SwiftUI', 'build this screen in Swift', 'push this SwiftUI view to Figma', 'mirror my Swift code in a Figma file', or whenever a Figma URL appears alongside `.swift` files / an `.xcodeproj`. Routes to a direction-specific reference doc; loads alongside `figma-use` for the code → design path.",
+      "plugin_id": "figma",
+      "plugin_family": "openai-curated-remote",
+      "installed_version": "2.0.21",
+      "resolved_skill_md": "C:/Users/picom/AppData/Roaming/orca/codex-runtime-home/home/plugins/cache/openai-curated-remote/figma/2.0.21/skills/figma-swiftui/SKILL.md",
+      "resolver_glob": "C:/Users/picom/AppData/Roaming/orca/codex-runtime-home/home/plugins/cache/openai-curated-remote/figma/*/skills/figma-swiftui/SKILL.md",
+      "sha256": "868c4defe2c0854f5a3e27594d3fa0f20347c86a9b15d103483b7488bfa8affe",
+      "enabled_in_model_catalog": false
+    },
+    {
+      "visible_name": "figma:figma-use",
+      "frontmatter_description": "**MANDATORY prerequisite** — you MUST invoke this skill BEFORE every `use_figma` tool call. NEVER call `use_figma` directly without loading this skill first. Skipping it causes common, hard-to-debug failures. Trigger whenever the user wants to perform a write action or a unique read action that requires JavaScript execution in the Figma file context — e.g. create/edit/delete nodes, set up variables or tokens, build components and variants, modify auto-layout or fills, bind variables to properties, or inspect file structure programmatically.",
+      "plugin_id": "figma",
+      "plugin_family": "openai-curated-remote",
+      "installed_version": "2.0.21",
+      "resolved_skill_md": "C:/Users/picom/AppData/Roaming/orca/codex-runtime-home/home/plugins/cache/openai-curated-remote/figma/2.0.21/skills/figma-use/SKILL.md",
+      "resolver_glob": "C:/Users/picom/AppData/Roaming/orca/codex-runtime-home/home/plugins/cache/openai-curated-remote/figma/*/skills/figma-use/SKILL.md",
+      "sha256": "7de62bb574c7acf3241643e0aafcea13e48ff06a12ef5203447eda3584e6ff4f",
+      "enabled_in_model_catalog": false
+    },
+    {
+      "visible_name": "figma:figma-use-figjam",
+      "frontmatter_description": "This skill helps agents use Figma's use_figma MCP tool in the FigJam context. Can be used alongside figma-use which has foundational context for using the use_figma tool.",
+      "plugin_id": "figma",
+      "plugin_family": "openai-curated-remote",
+      "installed_version": "2.0.21",
+      "resolved_skill_md": "C:/Users/picom/AppData/Roaming/orca/codex-runtime-home/home/plugins/cache/openai-curated-remote/figma/2.0.21/skills/figma-use-figjam/SKILL.md",
+      "resolver_glob": "C:/Users/picom/AppData/Roaming/orca/codex-runtime-home/home/plugins/cache/openai-curated-remote/figma/*/skills/figma-use-figjam/SKILL.md",
+      "sha256": "16b15da304f777e6bdc79bf425da73fa1ce0ea41af726cab8ddd6f40180acd74",
+      "enabled_in_model_catalog": false
+    },
+    {
+      "visible_name": "figma:figma-use-motion",
+      "frontmatter_description": "Motion / animation context for the `use_figma` MCP tool — animating Figma nodes via manual keyframes, animation styles, easing, and timeline duration. Load alongside figma-use whenever a task involves adding, editing, or inspecting animation on a node.",
+      "plugin_id": "figma",
+      "plugin_family": "openai-curated-remote",
+      "installed_version": "2.0.21",
+      "resolved_skill_md": "C:/Users/picom/AppData/Roaming/orca/codex-runtime-home/home/plugins/cache/openai-curated-remote/figma/2.0.21/skills/figma-use-motion/SKILL.md",
+      "resolver_glob": "C:/Users/picom/AppData/Roaming/orca/codex-runtime-home/home/plugins/cache/openai-curated-remote/figma/*/skills/figma-use-motion/SKILL.md",
+      "sha256": "d74fa8c9435a5260f8a61e3a8fbf11c068f940ae3423e9be2efde8b5e785d78c",
+      "enabled_in_model_catalog": false
+    },
+    {
+      "visible_name": "figma:figma-use-slides",
+      "frontmatter_description": "This skill helps agents use Figma's use_figma MCP tool in the Slides context. Can be used alongside figma-use which has foundational context for using the use_figma tool.",
+      "plugin_id": "figma",
+      "plugin_family": "openai-curated-remote",
+      "installed_version": "2.0.21",
+      "resolved_skill_md": "C:/Users/picom/AppData/Roaming/orca/codex-runtime-home/home/plugins/cache/openai-curated-remote/figma/2.0.21/skills/figma-use-slides/SKILL.md",
+      "resolver_glob": "C:/Users/picom/AppData/Roaming/orca/codex-runtime-home/home/plugins/cache/openai-curated-remote/figma/*/skills/figma-use-slides/SKILL.md",
+      "sha256": "0a69a65e686dcc223581afb409a4d31cf318716e2c65cc9c926839a8737e71a4",
+      "enabled_in_model_catalog": false
+    },
+    {
+      "visible_name": "notion:notion-knowledge-capture",
+      "frontmatter_description": "Capture conversations and decisions into structured Notion pages; use when turning chats/notes into wiki entries, how-tos, decisions, or FAQs with proper linking.",
+      "plugin_id": "notion",
+      "plugin_family": "openai-curated-remote",
+      "installed_version": "0.1.8",
+      "resolved_skill_md": "C:/Users/picom/AppData/Roaming/orca/codex-runtime-home/home/plugins/cache/openai-curated-remote/notion/0.1.8/skills/notion-knowledge-capture/SKILL.md",
+      "resolver_glob": "C:/Users/picom/AppData/Roaming/orca/codex-runtime-home/home/plugins/cache/openai-curated-remote/notion/*/skills/notion-knowledge-capture/SKILL.md",
+      "sha256": "ade7d8902823500f6af26bdf290f2a88e35b34ce9668739eb8807b773648e333",
+      "enabled_in_model_catalog": false
+    },
+    {
+      "visible_name": "notion:notion-meeting-intelligence",
+      "frontmatter_description": "Prepare meeting materials with Notion context and supplemental research; use when gathering context, drafting agendas/pre-reads, and tailoring materials to attendees.",
+      "plugin_id": "notion",
+      "plugin_family": "openai-curated-remote",
+      "installed_version": "0.1.8",
+      "resolved_skill_md": "C:/Users/picom/AppData/Roaming/orca/codex-runtime-home/home/plugins/cache/openai-curated-remote/notion/0.1.8/skills/notion-meeting-intelligence/SKILL.md",
+      "resolver_glob": "C:/Users/picom/AppData/Roaming/orca/codex-runtime-home/home/plugins/cache/openai-curated-remote/notion/*/skills/notion-meeting-intelligence/SKILL.md",
+      "sha256": "1a8647c46cdfab399a1e0199924e0aecb83034e9a1b0957db211a045145b7771",
+      "enabled_in_model_catalog": false
+    },
+    {
+      "visible_name": "notion:notion-research-documentation",
+      "frontmatter_description": "Research across Notion and synthesize into structured documentation; use when gathering info from multiple Notion sources to produce briefs, comparisons, or reports with citations.",
+      "plugin_id": "notion",
+      "plugin_family": "openai-curated-remote",
+      "installed_version": "0.1.8",
+      "resolved_skill_md": "C:/Users/picom/AppData/Roaming/orca/codex-runtime-home/home/plugins/cache/openai-curated-remote/notion/0.1.8/skills/notion-research-documentation/SKILL.md",
+      "resolver_glob": "C:/Users/picom/AppData/Roaming/orca/codex-runtime-home/home/plugins/cache/openai-curated-remote/notion/*/skills/notion-research-documentation/SKILL.md",
+      "sha256": "8ca523535915c1b9016202fa24d120545c60caea5c5545d74bfdec195f0a039a",
+      "enabled_in_model_catalog": false
+    },
+    {
+      "visible_name": "notion:notion-spec-to-implementation",
+      "frontmatter_description": "Turn Notion specs into implementation plans, tasks, and progress tracking; use when implementing PRDs/feature specs and creating Notion plans + tasks from them.",
+      "plugin_id": "notion",
+      "plugin_family": "openai-curated-remote",
+      "installed_version": "0.1.8",
+      "resolved_skill_md": "C:/Users/picom/AppData/Roaming/orca/codex-runtime-home/home/plugins/cache/openai-curated-remote/notion/0.1.8/skills/notion-spec-to-implementation/SKILL.md",
+      "resolver_glob": "C:/Users/picom/AppData/Roaming/orca/codex-runtime-home/home/plugins/cache/openai-curated-remote/notion/*/skills/notion-spec-to-implementation/SKILL.md",
+      "sha256": "43b304aaff38fbd4fd5d81efcefb2fd92f5450649eba8b02a2371edb4599cf3f",
+      "enabled_in_model_catalog": false
+    },
+    {
+      "visible_name": "documents:documents",
+      "frontmatter_description": "Create, edit, redline, and comment on `.docx`, Word, and Google Docs-targeted document artifacts inside the container, with a strict render-and-verify workflow. Use `render_docx.py` to generate page PNGs (and optional PDF) for visual QA, then iterate until layout is flawless before delivering the final document.",
+      "plugin_id": "documents",
+      "plugin_family": "openai-primary-runtime",
+      "installed_version": "26.826.12353",
+      "resolved_skill_md": "C:/Users/picom/AppData/Roaming/orca/codex-runtime-home/home/plugins/cache/openai-primary-runtime/documents/26.826.12353/skills/documents/SKILL.md",
+      "resolver_glob": "C:/Users/picom/AppData/Roaming/orca/codex-runtime-home/home/plugins/cache/openai-primary-runtime/documents/*/skills/documents/SKILL.md",
+      "sha256": "adb4fa343854795dcb724871b66c5e05ba537d110a62ecc700fa2f44967a0295",
+      "enabled_in_model_catalog": false
+    },
+    {
+      "visible_name": "pdf:pdf",
+      "frontmatter_description": "Read, create, inspect, render, and verify PDF files where visual layout matters, including fillable AcroForms. Use Poppler rendering plus Python tools such as reportlab, pdfplumber, and pypdf for generation and extraction.",
+      "plugin_id": "pdf",
+      "plugin_family": "openai-primary-runtime",
+      "installed_version": "26.826.12353",
+      "resolved_skill_md": "C:/Users/picom/AppData/Roaming/orca/codex-runtime-home/home/plugins/cache/openai-primary-runtime/pdf/26.826.12353/skills/pdf/SKILL.md",
+      "resolver_glob": "C:/Users/picom/AppData/Roaming/orca/codex-runtime-home/home/plugins/cache/openai-primary-runtime/pdf/*/skills/pdf/SKILL.md",
+      "sha256": "9e429bfc5ada20ccf25a531484e3dcc5da59811d936a7cc5dfd23dbf2dfadd31",
+      "enabled_in_model_catalog": false
+    },
+    {
+      "visible_name": "presentations:Presentations",
+      "frontmatter_description": "Read, create or edit PowerPoint or Google Slides decks. Use for presentation, slide deck, PowerPoint, PPT, PPTX, or Google Slides requests.",
+      "plugin_id": "presentations",
+      "plugin_family": "openai-primary-runtime",
+      "installed_version": "26.826.12353",
+      "resolved_skill_md": "C:/Users/picom/AppData/Roaming/orca/codex-runtime-home/home/plugins/cache/openai-primary-runtime/presentations/26.826.12353/skills/presentations/SKILL.md",
+      "resolver_glob": "C:/Users/picom/AppData/Roaming/orca/codex-runtime-home/home/plugins/cache/openai-primary-runtime/presentations/*/skills/presentations/SKILL.md",
+      "sha256": "ff995d3fa77181b3f43f9a8a3892d453f91900729a9fa6eb1c7b3de8af35318b",
+      "enabled_in_model_catalog": false
+    },
+    {
+      "visible_name": "plugin-management:plugin-management",
+      "frontmatter_description": "Discover and suggest relevant plugins, inspect app permissions and dependencies, and manage plugin connections or removal. Use when the user asks about plugins or when a task would materially benefit from an external app, account, service, or data source that available tools cannot access.",
+      "plugin_id": "plugin-management",
+      "plugin_family": "openai-curated-remote",
+      "installed_version": "0.1.0",
+      "resolved_skill_md": "C:/Users/picom/AppData/Roaming/orca/codex-runtime-home/home/plugins/cache/openai-curated-remote/plugin-management/0.1.0/skills/plugin-management/SKILL.md",
+      "resolver_glob": "C:/Users/picom/AppData/Roaming/orca/codex-runtime-home/home/plugins/cache/openai-curated-remote/plugin-management/*/skills/plugin-management/SKILL.md",
+      "sha256": "653841cc21205269f08b0ce135891e1518dac616a766bcfb0b57d788d3f68b10",
+      "enabled_in_model_catalog": false
+    }
+  ]
+}

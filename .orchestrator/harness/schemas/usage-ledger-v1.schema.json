@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Content-free usage ledger record v1",
+  "type": "object",
+  "required": ["version", "provider"],
+  "properties": {
+    "version": { "const": 1 },
+    "provider": { "type": "string" },
+    "inputTokens": { "type": "number", "minimum": 0 },
+    "cachedInputTokens": { "type": "number", "minimum": 0 },
+    "uncachedInputTokens": { "type": "number", "minimum": 0 },
+    "outputTokens": { "type": "number", "minimum": 0 },
+    "reasoningTokens": { "type": "number", "minimum": 0 },
+    "cacheCreationInputTokens": { "type": "number", "minimum": 0 },
+    "costUsd": { "type": "number", "minimum": 0 },
+    "requestedModel": { "type": "string" }, "observedModel": { "type": "string" },
+    "observedModels": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "requestedFast": { "type": ["boolean", "string"] }, "observedFast": { "type": ["boolean", "string"] },
+    "fastModeReason": { "type": "string" },
+    "sourceHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "anomalies": { "type": "array", "items": { "type": "string" } }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,76 @@
+"""Verification gate shared by Stage 1-3.
+
+Exit 0 = PASS, exit 1 = FAIL with a printed reason. This is the independent
+check a Judge would run against a node's events.jsonl - it does not trust
+kernel_bridge.py's own claims, it recomputes everything from raw bytes.
+"""
+
+import hashlib
+import json
+import sys
+from pathlib import Path
+
+
+def digest_of(payload: dict) -> str:
+    body = {k: v for k, v in payload.items() if k != "digest"}
+    canonical = json.dumps(body, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
+def verify(run_dir: Path, max_depth: int) -> list[str]:
+    ep = run_dir / "events.jsonl"
+    failures = []
+    if not ep.exists():
+        return ["events.jsonl does not exist"]
+
+    events = []
+    for i, line in enumerate(ep.read_text(encoding="utf-8").splitlines()):
+        if not line.strip():
+            continue
+        try:
+            events.append(json.loads(line))
+        except json.JSONDecodeError as e:
+            failures.append(f"line {i}: invalid JSON ({e})")
+    if failures:
+        return failures
+
+    prev_digest = "genesis"
+    for ev in events:
+        recomputed = digest_of(ev)
+        if ev.get("digest") != recomputed:
+            failures.append(
+                f"seq={ev.get('seq')}: digest mismatch "
+                f"(stored={ev.get('digest')}, recomputed={recomputed}) - content tampered or corrupted"
+            )
+        if ev.get("prevDigest") != prev_digest:
+            failures.append(
+                f"seq={ev.get('seq')}: chain broken "
+                f"(expected prevDigest={prev_digest}, got={ev.get('prevDigest')})"
+            )
+        prev_digest = ev.get("digest")
+
+        if ev.get("type") == "admission":
+            depth = ev.get("kernelDepth")
+            if depth is None:
+                failures.append(f"seq={ev.get('seq')}: admission event missing kernelDepth")
+            elif depth > max_depth:
+                failures.append(f"seq={ev.get('seq')}: kernelDepth={depth} exceeds max={max_depth}")
+            for required in ("node_id", "child_id", "model", "kernelParent"):
+                if required not in ev:
+                    failures.append(f"seq={ev.get('seq')}: admission event missing field '{required}'")
+
+    return failures
+
+
+def main() -> None:
+    run_dir = Path(sys.argv[1])
+    max_depth = int(sys.argv[2]) if len(sys.argv) > 2 else 2
+    failures = verify(run_dir, max_depth)
+    if failures:
+        print(json.dumps({"status": "FAIL", "failures": failures}, indent=2))
+        sys.exit(1)
+    print(json.dumps({"status": "PASS", "run_dir": str(run_dir)}))
+
+
+if __name__ == "__main__":
+    main()

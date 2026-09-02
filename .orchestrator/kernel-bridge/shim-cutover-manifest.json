@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "phase": "installed",
+  "shims": [
+    {
+      "name": "kernel_bridge.py",
+      "targetPath": ".orchestrator/kernel-bridge/kernel_bridge.py",
+      "backupPath": ".orchestrator/kernel-bridge/kernel_bridge.py.pre-harness-v2",
+      "byteLength": 31461,
+      "sha256": "c3d2e84e48bd52386e542a2f878052286bbf90dc14a5b0a9af6aa68a95100af8",
+      "shimSha256": "fa1da1cb0ededffd2638cdc9f30c96f5090bcf64996457214e710214f7e72ec2"
+    },
+    {
+      "name": "verify_events.py",
+      "targetPath": ".orchestrator/kernel-bridge/verify_events.py",
+      "backupPath": ".orchestrator/kernel-bridge/verify_events.py.pre-harness-v2",
+      "byteLength": 2662,
+      "sha256": "8121885f8953c821bf1d14a7f88817e9eed36723df80147695eb0102c57dad64",
+      "shimSha256": "8a0f063a3a133f7d4bfc8b9d32cb95958f91797f747d1dc33d7076b9ec31861d"
+    }
+  ]
+}

@@ -1,0 +1,790 @@
+"""Kernel Bridge driver script.
+
+Implements kernel-bridge-harness-proposal.md, Stages 0-3:
+  Stage 0 - exec/list/teardown: node-scoped persistent Python kernel.
+  Stage 1 - spawn --dry-run: admission-only events, hash-chained, no real call.
+  Stage 2 - --owns lockfile: real ownership enforcement, not convention.
+  Stage 3 - spawn (real): detached, non-blocking `codex exec` admission;
+            completion polled later via `read`, never returned by `spawn`.
+
+Governance invariants preserved from C-GCP (unchanged by this file):
+  - Kernel Bridge is node-internal. It never creates DAG nodes, never judges,
+    never grants Human-gate authority. It only writes events into the SAME
+    run's events.jsonl the DAG already owns.
+  - `sol` may be spawned for in-node advisory help, never as this node's
+    Judge. Judge selection happens outside this script entirely.
+"""
+
+import argparse
+import contextlib
+import hashlib
+import json
+import os
+import re
+import subprocess
+import sys
+import time
+import uuid
+from pathlib import Path
+
+from jupyter_client import KernelManager
+
+_WIN_HANDLE_FLAG_INHERIT = 0x00000001
+
+
+def _make_stdio_noninheritable() -> None:
+    """jupyter_client's launch_kernel() hard-codes close_fds=False on
+    Windows ("avoid closing the above parent and interrupt handles" - it
+    needs that for its own JPY_PARENT_PID/JPY_INTERRUPT_EVENT machinery),
+    silently discarding whatever close_fds we pass to start_kernel(). With
+    close_fds=False, every inheritable handle in this process - including
+    the pipe write-end a caller's `| tail` or subprocess.run(capture_output)
+    is reading from - gets duplicated into the kernel process, which then
+    holds it open indefinitely. The CLI call itself still exits normally;
+    the caller just never sees EOF. Marking our own stdio handles
+    non-inheritable here, before start_kernel() runs, keeps them out of
+    reach regardless of jupyter_client's close_fds override; it doesn't
+    require close_fds to cooperate at all.
+    """
+    if sys.platform != "win32":
+        return
+    import ctypes
+    import msvcrt
+
+    for stream in (sys.stdin, sys.stdout, sys.stderr):
+        try:
+            handle = msvcrt.get_osfhandle(stream.fileno())
+            ctypes.windll.kernel32.SetHandleInformation(handle, _WIN_HANDLE_FLAG_INHERIT, 0)
+        except (OSError, ValueError, AttributeError):
+            pass  # stream has no real OS handle (e.g. redirected to a non-file object)
+
+
+KERNEL_MAX_DEPTH_DEFAULT = 2
+MODEL_MAP = {
+    "luna": "gpt-5.6-luna",
+    "terra": "gpt-5.6-terra",
+    "sol": "gpt-5.6-sol",
+}
+
+_SAFE_IDENTIFIER = re.compile(r"^[A-Za-z0-9._-]+$")
+
+
+def validate_identifier(value: str, label: str) -> str:
+    """node_id and child_id become raw path segments (kernel_dir, spawn_dir).
+    An unvalidated `../../x` would escape run_dir entirely - this is the
+    fix for that, not a cosmetic check.
+    """
+    if not value or not _SAFE_IDENTIFIER.match(value) or ".." in value:
+        raise ValueError(f"invalid {label} {value!r}: must match {_SAFE_IDENTIFIER.pattern}")
+    return value
+
+
+def normalize_owned_path(path: str) -> str:
+    """Windows paths are case-insensitive and slash-direction-agnostic.
+    `src/foo.ts`, `src\\foo.ts`, `SRC/FOO.TS` must hash to the same lock or
+    the lock provides no real exclusion at all - only the appearance of one.
+    """
+    return os.path.normcase(os.path.normpath(path))
+
+
+# --------------------------------------------------------------------------
+# Paths
+# --------------------------------------------------------------------------
+
+def kernel_dir(run_dir: Path, node_id: str) -> Path:
+    validate_identifier(node_id, "node_id")
+    d = Path(run_dir) / "kernel" / node_id
+    d.mkdir(parents=True, exist_ok=True)
+    return d
+
+
+def connection_file(run_dir: Path, node_id: str) -> Path:
+    return kernel_dir(run_dir, node_id) / "connection.json"
+
+
+def pid_file(run_dir: Path, node_id: str) -> Path:
+    return kernel_dir(run_dir, node_id) / "kernel.pid"
+
+
+def events_path(run_dir: Path) -> Path:
+    return Path(run_dir) / "events.jsonl"
+
+
+def locks_dir(run_dir: Path) -> Path:
+    d = Path(run_dir) / "locks"
+    d.mkdir(parents=True, exist_ok=True)
+    return d
+
+
+def spawn_dir(run_dir: Path, child_id: str) -> Path:
+    validate_identifier(child_id, "child_id")
+    d = Path(run_dir) / "kernel" / "spawns" / child_id
+    d.mkdir(parents=True, exist_ok=True)
+    return d
+
+
+def spawn_pid_file(run_dir: Path, child_id: str) -> Path:
+    return spawn_dir(run_dir, child_id) / "pid"
+
+
+# --------------------------------------------------------------------------
+# Stage 1: hash-chained event log
+# --------------------------------------------------------------------------
+
+def _digest(payload: dict) -> str:
+    canonical = json.dumps(payload, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
+def _last_digest(run_dir: Path) -> str:
+    ep = events_path(run_dir)
+    if not ep.exists():
+        return "genesis"
+    last = None
+    with ep.open("r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if line:
+                last = json.loads(line)
+    return last["digest"] if last else "genesis"
+
+
+@contextlib.contextmanager
+def events_mutex(run_dir: Path, timeout: float = 10.0):
+    """A concurrent 20-way append test (real threads, not just OS-scheduled
+    processes) corrupted the chain and crashed several callers outright -
+    read-prev-digest, read-and-increment-seq, and append were three
+    unsynchronized steps. This wraps all three in one real cross-process
+    mutex using the same O_EXCL primitive as the ownership locks.
+    """
+    lock_path = Path(run_dir) / ".events.lock"
+    deadline = time.time() + timeout
+    fd = None
+    while fd is None:
+        try:
+            fd = os.open(str(lock_path), os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+        except FileExistsError:
+            if time.time() > deadline:
+                raise TimeoutError(f"could not acquire events mutex within {timeout}s")
+            time.sleep(0.01 + (os.getpid() % 10) * 0.002)  # jitter to de-sync retries
+    try:
+        os.close(fd)
+        yield
+    finally:
+        lock_path.unlink(missing_ok=True)
+
+
+def append_event(run_dir: Path, event_type: str, **fields) -> dict:
+    """Append one event to the run's existing events.jsonl, extended with
+    kernelDepth/kernelParent per the proposal's schema addition. Never
+    creates a new chain: always links to whatever the DAG already wrote.
+    """
+    with events_mutex(run_dir):
+        prev = _last_digest(run_dir)
+        seq_file = Path(run_dir) / ".kernel-seq"
+        seq = int(seq_file.read_text()) + 1 if seq_file.exists() else 1
+        seq_file.write_text(str(seq), encoding="utf-8")
+
+        payload = {
+            "seq": seq,
+            "ts": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            "type": event_type,
+            "prevDigest": prev,
+            **fields,
+        }
+        payload["digest"] = _digest(payload)
+
+        with events_path(run_dir).open("a", encoding="utf-8") as f:
+            f.write(json.dumps(payload) + "\n")
+        return payload
+
+
+def read_events(run_dir: Path) -> list[dict]:
+    ep = events_path(run_dir)
+    if not ep.exists():
+        return []
+    out = []
+    with ep.open("r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if line:
+                out.append(json.loads(line))
+    return out
+
+
+def resolve_depth(run_dir: Path, node_id: str, parent_child_id: str | None) -> int:
+    """Depth is recursion depth (parent -> child -> grandchild), not how
+    many independent siblings a node has admitted. The earlier version used
+    max(existing depths for this node_id) + 1, so two unrelated siblings
+    under the same DAG node got depth 1 and depth 2 - the second sibling
+    was never actually nested inside the first. Every direct spawn from a
+    DAG node is depth 1, full stop; depth only increases when a spawn is
+    explicitly attributed to a previously admitted child via
+    --parent-child-id (that child recursing further), mirroring Prime
+    Agent's RLM_DEPTH, which increments per generation, not per sibling.
+    """
+    if parent_child_id is None:
+        return 1
+    for ev in read_events(run_dir):
+        if ev.get("type") == "admission" and ev.get("child_id") == parent_child_id:
+            return ev.get("kernelDepth", 0) + 1
+    raise ValueError(f"unknown --parent-child-id {parent_child_id!r}: no admission event found for it")
+
+
+# --------------------------------------------------------------------------
+# Model routing (Stage 1) - codifies the existing SKILL.md policy table
+# --------------------------------------------------------------------------
+
+def route_model(explicit: str, prompt: str, owns: list[str]) -> str:
+    if explicit in MODEL_MAP:
+        return explicit
+    if explicit not in (None, "auto"):
+        raise ValueError(f"unknown --model {explicit!r}; use luna|terra|sol|auto")
+
+    # auto: read-only / low-volume signals route to luna; anything that
+    # claims file ownership or looks like an implementation ask routes to
+    # terra. Ambiguous always resolves up to terra, never down to luna -
+    # a wrong terra call wastes budget; a wrong luna call silently under-
+    # powers a task that needed write authority.
+    implementation_markers = (
+        "fix", "implement", "refactor", "add", "write", "update", "modify", "change"
+    )
+    if owns:
+        return "terra"
+    lowered = prompt.lower()
+    if any(marker in lowered for marker in implementation_markers):
+        return "terra"
+    return "luna"
+
+
+# --------------------------------------------------------------------------
+# Stage 2: ownership lockfile (real enforcement, not convention)
+# --------------------------------------------------------------------------
+
+def lock_path_for(run_dir: Path, path: str) -> Path:
+    normalized = normalize_owned_path(path)
+    return locks_dir(run_dir) / (hashlib.sha256(normalized.encode("utf-8")).hexdigest() + ".lock")
+
+
+def acquire_lock(run_dir: Path, path: str, owner_child_id: str, node_id: str) -> bool:
+    lock_path = lock_path_for(run_dir, path)
+    payload = {
+        "owner": owner_child_id, "node_id": node_id,
+        "path": path, "normalized_path": normalize_owned_path(path),
+        "acquired_at": time.time(),
+    }
+    try:
+        fd = os.open(str(lock_path), os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            json.dump(payload, f)
+        return True
+    except FileExistsError:
+        return False
+
+
+def release_lock(run_dir: Path, path: str) -> None:
+    lock_path_for(run_dir, path).unlink(missing_ok=True)
+
+
+def release_locks_for_node(run_dir: Path, node_id: str) -> int:
+    released = 0
+    for lock_path in locks_dir(run_dir).glob("*.lock"):
+        try:
+            info = json.loads(lock_path.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError):
+            continue
+        if info.get("node_id") == node_id:
+            lock_path.unlink(missing_ok=True)
+            released += 1
+    return released
+
+
+def node_has_live_owner(run_dir: Path, node_id: str) -> bool:
+    """True if `node_id` has a live kernel process or a live real spawn -
+    the earlier version reclaimed any lock whose node_id != caller without
+    checking this at all, so it could steal a lock out from under a sibling
+    that was genuinely still running, not actually stale.
+    """
+    kpf = pid_file(run_dir, node_id)
+    if kpf.exists():
+        try:
+            if _pid_alive(int(kpf.read_text(encoding="utf-8").strip())):
+                return True
+        except (ValueError, OSError):
+            pass
+    for child_id in spawns_for_node(run_dir, node_id):
+        if spawn_is_done(run_dir, child_id):
+            continue
+        spf = spawn_pid_file(run_dir, child_id)
+        if spf.exists():
+            try:
+                if _pid_alive(int(spf.read_text(encoding="utf-8").strip())):
+                    return True
+            except (ValueError, OSError):
+                pass
+    return False
+
+
+def force_reclaim_stale(run_dir: Path, current_node_id: str) -> dict:
+    """Only reclaim locks whose owning node_id both (a) differs from the
+    caller and (b) has no live kernel or spawn process backing it.
+    """
+    reclaimed, denied = 0, []
+    for lock_path in locks_dir(run_dir).glob("*.lock"):
+        try:
+            info = json.loads(lock_path.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError):
+            continue
+        owner_node = info.get("node_id")
+        if owner_node == current_node_id:
+            continue
+        if node_has_live_owner(run_dir, owner_node):
+            denied.append(owner_node)
+            continue
+        lock_path.unlink(missing_ok=True)
+        reclaimed += 1
+    return {"reclaimed": reclaimed, "denied_live_owners": denied}
+
+
+# --------------------------------------------------------------------------
+# Spawn process lifecycle (fixes the gap: admission had no matching kill)
+# --------------------------------------------------------------------------
+
+def spawns_for_node(run_dir: Path, node_id: str) -> list[str]:
+    """Real (non-dry-run) child_ids admitted under this node, from the
+    event log itself - not a separate index that could drift from it.
+    """
+    return [
+        ev["child_id"] for ev in read_events(run_dir)
+        if ev.get("type") == "admission" and ev.get("node_id") == node_id and ev.get("mode") == "real"
+    ]
+
+
+def spawn_is_done(run_dir: Path, child_id: str) -> bool:
+    return (spawn_dir(run_dir, child_id) / "done").exists()
+
+
+def kill_spawn(run_dir: Path, child_id: str, node_id: str, reason: str) -> dict:
+    """Tree-kill a spawn's process group and log the outcome into the same
+    hash chain every other event goes into - a kill is as auditable as an
+    admission or a reply.
+    """
+    pf = spawn_pid_file(run_dir, child_id)
+    if not pf.exists():
+        return {"child_id": child_id, "status": "no_pid_on_record"}
+    if spawn_is_done(run_dir, child_id):
+        return {"child_id": child_id, "status": "already_done"}
+
+    pid = int(pf.read_text(encoding="utf-8").strip())
+    if not _pid_alive(pid):
+        append_event(run_dir, "spawn_killed", child_id=child_id, node_id=node_id, pid=pid, reason=reason, status="already_dead")
+        return {"child_id": child_id, "pid": pid, "status": "already_dead"}
+
+    # /T: tree-kill. `pid` is the .bat file's cmd.exe host, codex.exe is its
+    # child - a plain /PID kill would leave codex.exe running as an orphan.
+    subprocess.run(["taskkill", "/F", "/T", "/PID", str(pid)], capture_output=True)
+    deadline = time.time() + 5
+    while _pid_alive(pid) and time.time() < deadline:
+        time.sleep(0.2)
+    still_alive = _pid_alive(pid)
+
+    append_event(
+        run_dir, "spawn_killed", child_id=child_id, node_id=node_id, pid=pid,
+        reason=reason, status="still_alive" if still_alive else "terminated",
+    )
+    return {"child_id": child_id, "pid": pid, "status": "still_alive" if still_alive else "terminated"}
+
+
+# --------------------------------------------------------------------------
+# Stage 0: kernel exec/list/teardown (unchanged behavior)
+# --------------------------------------------------------------------------
+
+def start_or_attach(run_dir: Path, node_id: str) -> KernelManager:
+    cf = connection_file(run_dir, node_id)
+    if cf.exists():
+        try:
+            info = json.loads(cf.read_text(encoding="utf-8"))
+            if isinstance(info.get("key"), str):
+                info["key"] = info["key"].encode("utf-8")
+            km = KernelManager()
+            km.load_connection_info(info)
+            kc = km.client()
+            kc.start_channels()
+            kc.kernel_info(reply=True, timeout=5)
+            kc.stop_channels()
+            return km
+        except Exception:
+            pass
+
+    km = KernelManager()
+    # Root cause of the pipe/capture hang: jupyter_client hard-codes
+    # close_fds=False on Windows internally (see _make_stdio_noninheritable
+    # docstring) - our close_fds=True below never reaches Popen. Clearing
+    # the inherit flag on our own stdio handles first makes that override
+    # irrelevant: there is nothing left for the kernel process to inherit.
+    _make_stdio_noninheritable()
+    km.start_kernel(
+        independent=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+        close_fds=True, creationflags=subprocess.CREATE_NO_WINDOW,
+    )
+    info = km.get_connection_info(session=False)
+    if isinstance(info.get("key"), bytes):
+        info["key"] = info["key"].decode("utf-8")
+    cf.write_text(json.dumps(info), encoding="utf-8")
+    launch_cf = Path(km.connection_file)
+    pid_file(run_dir, node_id).write_text(str(_find_real_kernel_pid(launch_cf)), encoding="utf-8")
+    return km
+
+
+def _find_real_kernel_pid(cf: Path, retries: int = 20, delay: float = 0.25) -> int | None:
+    import psutil
+
+    target = str(cf.resolve())
+    for _ in range(retries):
+        for proc in psutil.process_iter(["pid", "name", "cmdline"]):
+            try:
+                cmdline = proc.info["cmdline"] or []
+            except (psutil.NoSuchProcess, psutil.AccessDenied):
+                continue
+            if any(target in part for part in cmdline) and "ipykernel" in " ".join(cmdline):
+                children = [
+                    c for c in proc.children(recursive=True)
+                    if any(target in p for p in (c.cmdline() or []))
+                ]
+                return children[-1].pid if children else proc.pid
+        time.sleep(delay)
+    return None
+
+
+def _pid_alive(pid: int) -> bool:
+    try:
+        import psutil
+        return psutil.pid_exists(pid)
+    except ImportError:
+        out = subprocess.run(
+            ["tasklist", "/FI", f"PID eq {pid}"], capture_output=True, text=True
+        ).stdout
+        return str(pid) in out
+
+
+def cmd_exec(args: argparse.Namespace) -> None:
+    run_dir = Path(args.run_dir)
+    km = start_or_attach(run_dir, args.node_id)
+    kc = km.client()
+    kc.start_channels()
+    kc.wait_for_ready(timeout=30)
+
+    msg_id = kc.execute(args.code)
+    stdout_parts, result, error = [], None, None
+    while True:
+        msg = kc.get_iopub_msg(timeout=30)
+        if msg["parent_header"].get("msg_id") != msg_id:
+            continue
+        msg_type = msg["msg_type"]
+        content = msg["content"]
+        if msg_type == "stream":
+            stdout_parts.append(content["text"])
+        elif msg_type in ("execute_result", "display_data"):
+            result = content["data"].get("text/plain")
+        elif msg_type == "error":
+            error = "\n".join(content["traceback"])
+        elif msg_type == "status" and content["execution_state"] == "idle":
+            break
+    kc.stop_channels()
+
+    payload = {"node_id": args.node_id, "stdout": "".join(stdout_parts), "result": result, "error": error}
+    # The kernel this call started can keep our stdout pipe's write-end open
+    # after this process exits (see _make_stdio_noninheritable - the direct
+    # fix reduces but does not eliminate the exposure), so a caller reading
+    # our stdout through a blocking pipe/capture can hang despite this
+    # command having already finished correctly. Also write the same result
+    # to a file that never depends on pipe EOF, so callers have a reliable
+    # way to get the answer regardless: read last_result.json instead of
+    # capturing stdout when scripting against `exec`.
+    (kernel_dir(run_dir, args.node_id) / "last_result.json").write_text(json.dumps(payload), encoding="utf-8")
+    print(json.dumps(payload))
+    if error:
+        sys.exit(1)
+
+
+def cmd_list(args: argparse.Namespace) -> None:
+    run_dir = Path(args.run_dir) / "kernel"
+    nodes = []
+    if run_dir.exists():
+        for node_dir in sorted(run_dir.iterdir()):
+            if node_dir.name == "spawns":
+                continue
+            pf = node_dir / "kernel.pid"
+            cf = node_dir / "connection.json"
+            nodes.append({
+                "node_id": node_dir.name,
+                "pid": pf.read_text(encoding="utf-8").strip() if pf.exists() else None,
+                "connection_file_exists": cf.exists(),
+            })
+    print(json.dumps({"run_dir": str(Path(args.run_dir)), "nodes": nodes}))
+
+
+def cmd_teardown(args: argparse.Namespace) -> None:
+    run_dir = Path(args.run_dir)
+    cf = connection_file(run_dir, args.node_id)
+    pf = pid_file(run_dir, args.node_id)
+
+    # Kill any spawns this node admitted that are still running BEFORE
+    # releasing locks. Locks record ownership by child_id; releasing them
+    # first would let a sibling node re-acquire the path while the original
+    # spawn (read-only, but still burning tokens/time) keeps running unseen.
+    spawn_results = [
+        kill_spawn(run_dir, child_id, args.node_id, reason="node_teardown")
+        for child_id in spawns_for_node(run_dir, args.node_id)
+        if not spawn_is_done(run_dir, child_id)
+    ]
+    released = release_locks_for_node(run_dir, args.node_id)
+    if not cf.exists():
+        print(json.dumps({
+            "node_id": args.node_id, "status": "no_kernel",
+            "locks_released": released, "spawns_killed": spawn_results,
+        }))
+        return
+
+    info = json.loads(cf.read_text(encoding="utf-8"))
+    if isinstance(info.get("key"), str):
+        info["key"] = info["key"].encode("utf-8")
+    km = KernelManager()
+    km.load_connection_info(info)
+    try:
+        kc = km.client()
+        kc.start_channels()
+        kc.shutdown(reply=False)
+        kc.stop_channels()
+    except Exception:
+        pass
+
+    pid = int(pf.read_text(encoding="utf-8").strip()) if pf.exists() else None
+    deadline = time.time() + 5
+    while pid is not None and _pid_alive(pid) and time.time() < deadline:
+        time.sleep(0.2)
+
+    force_killed = False
+    if pid is not None and _pid_alive(pid):
+        subprocess.run(["taskkill", "/F", "/PID", str(pid)], capture_output=True)
+        force_killed = True
+        time.sleep(0.3)
+
+    still_alive = pid is not None and _pid_alive(pid)
+    cf.unlink(missing_ok=True)
+    pf.unlink(missing_ok=True)
+    print(json.dumps({
+        "node_id": args.node_id, "pid": pid,
+        "status": "still_alive" if still_alive else "terminated",
+        "force_killed": force_killed, "locks_released": released,
+        "spawns_killed": spawn_results,
+    }))
+    if still_alive or any(r.get("status") == "still_alive" for r in spawn_results):
+        sys.exit(1)
+
+
+def cmd_spawn_kill(args: argparse.Namespace) -> None:
+    run_dir = Path(args.run_dir)
+    result = kill_spawn(run_dir, args.child_id, args.node_id, reason=args.reason)
+    print(json.dumps(result))
+    if result.get("status") == "still_alive":
+        sys.exit(1)
+
+
+# --------------------------------------------------------------------------
+# Stage 1 + Stage 3: spawn / read
+# --------------------------------------------------------------------------
+
+def cmd_spawn(args: argparse.Namespace) -> None:
+    run_dir = Path(args.run_dir)
+    validate_identifier(args.node_id, "node_id")
+    if args.parent_child_id is not None:
+        validate_identifier(args.parent_child_id, "parent_child_id")
+    max_depth = args.max_depth
+
+    try:
+        depth = resolve_depth(run_dir, args.node_id, args.parent_child_id)
+    except ValueError as e:
+        print(json.dumps({"status": "rejected", "reason": "unknown_parent", "error": str(e)}))
+        sys.exit(1)
+
+    kernel_parent = args.parent_child_id if args.parent_child_id is not None else args.node_id
+
+    if depth > max_depth:
+        ev = append_event(
+            run_dir, "depth_exceeded", node_id=args.node_id,
+            kernelDepth=depth, kernelParent=kernel_parent, requested_model=args.model,
+        )
+        print(json.dumps({"status": "rejected", "reason": "depth_exceeded", "event_seq": ev["seq"]}))
+        sys.exit(1)
+
+    child_id = f"sub-{uuid.uuid4().hex[:8]}"
+    tier = route_model(args.model, args.prompt, args.owns or [])
+    model = MODEL_MAP[tier]
+
+    owns = args.owns or []
+    locked = []
+    for path in owns:
+        if acquire_lock(run_dir, path, child_id, args.node_id):
+            locked.append(path)
+        else:
+            # A 20-way concurrency test showed this rejection path used to
+            # leave every already-acquired lock in `locked` held forever -
+            # this child_id was never admitted, so nothing would ever call
+            # teardown/spawn-kill for it to release them.
+            for acquired_path in locked:
+                release_lock(run_dir, acquired_path)
+            ev = append_event(
+                run_dir, "ownership_conflict", node_id=args.node_id, child_id=child_id,
+                path=path, kernelDepth=depth, kernelParent=kernel_parent,
+                released_on_conflict=locked,
+            )
+            print(json.dumps({"status": "rejected", "reason": "ownership_conflict", "path": path, "event_seq": ev["seq"]}))
+            sys.exit(1)
+
+    if args.dry_run:
+        ev = append_event(
+            run_dir, "admission", node_id=args.node_id, child_id=child_id,
+            model=model, tier=tier, prompt=args.prompt, owns=owns,
+            kernelDepth=depth, kernelParent=kernel_parent, mode="dry_run",
+        )
+        print(json.dumps({"status": "admitted", "mode": "dry_run", "child_id": child_id, "model": model, "event_seq": ev["seq"]}))
+        return
+
+    # Real path: launch `codex exec` fully detached so this call returns
+    # immediately without waiting for the model - the same non-blocking
+    # admission contract as Prime Agent's rlm(). Completion is polled later
+    # via `read <child_id>`, never returned here.
+    #
+    # A `cmd /c "<chained string>"` argv silently fails here: Python's
+    # Windows argv quoting (list2cmdline) and cmd.exe's own `/c` string
+    # parser disagree on quotes next to `&`/`>`, so the wrapper cmd.exe
+    # exits without running anything and leaves no trace. A real .bat file
+    # sidesteps the quoting mismatch entirely since cmd.exe reads it as a
+    # script, not a quoted argv string.
+    sdir = spawn_dir(run_dir, child_id)
+    outfile = sdir / "output.txt"
+    donefile = sdir / "done"
+    batfile = sdir / "run.bat"
+    escaped_prompt = args.prompt.replace('"', '""')
+    batfile.write_text(
+        "@echo off\r\n"
+        f'codex exec -m {model} -s read-only "{escaped_prompt}" > "{outfile}" 2>&1\r\n'
+        f'echo done> "{donefile}"\r\n',
+        encoding="utf-8",
+    )
+    creationflags = subprocess.CREATE_NO_WINDOW | subprocess.CREATE_NEW_PROCESS_GROUP
+    try:
+        proc = subprocess.Popen([str(batfile)], creationflags=creationflags, close_fds=True)
+    except OSError as e:
+        # Locks were already acquired above - a launch failure must not
+        # leave them held by a child_id that was never actually admitted.
+        for acquired_path in owns:
+            release_lock(run_dir, acquired_path)
+        ev = append_event(
+            run_dir, "spawn_failed", node_id=args.node_id, child_id=child_id,
+            kernelDepth=depth, kernelParent=kernel_parent, error=str(e), released_locks=owns,
+        )
+        print(json.dumps({"status": "rejected", "reason": "launch_failed", "error": str(e), "event_seq": ev["seq"]}))
+        sys.exit(1)
+
+    # proc.pid is the .bat file's own cmd.exe interpreter, not codex.exe
+    # directly - but it is codex.exe's *parent*, so `taskkill /T` on this
+    # pid kills the whole tree without needing PID-matching tricks.
+    spawn_pid_file(run_dir, child_id).write_text(str(proc.pid), encoding="utf-8")
+
+    ev = append_event(
+        run_dir, "admission", node_id=args.node_id, child_id=child_id,
+        model=model, tier=tier, prompt=args.prompt, owns=owns,
+        kernelDepth=depth, kernelParent=kernel_parent, mode="real",
+    )
+    print(json.dumps({"status": "admitted", "mode": "real", "child_id": child_id, "model": model, "event_seq": ev["seq"]}))
+
+
+def cmd_read(args: argparse.Namespace) -> None:
+    run_dir = Path(args.run_dir)
+    validate_identifier(args.child_id, "child_id")
+    sdir = Path(run_dir) / "kernel" / "spawns" / args.child_id
+    donefile = sdir / "done"
+    outfile = sdir / "output.txt"
+    if not sdir.exists():
+        print(json.dumps({"child_id": args.child_id, "status": "unknown"}))
+        sys.exit(1)
+    if not donefile.exists():
+        print(json.dumps({"child_id": args.child_id, "status": "not_ready"}))
+        return
+
+    output = outfile.read_text(encoding="utf-8", errors="replace") if outfile.exists() else ""
+    already_recorded = any(
+        ev.get("type") == "reply" and ev.get("child_id") == args.child_id
+        for ev in read_events(run_dir)
+    )
+    if not already_recorded:
+        append_event(run_dir, "reply", child_id=args.child_id, output=output)
+    print(json.dumps({"child_id": args.child_id, "status": "done", "output": output}))
+
+
+def cmd_release_locks(args: argparse.Namespace) -> None:
+    run_dir = Path(args.run_dir)
+    if args.force_reclaim:
+        result = force_reclaim_stale(run_dir, args.node_id)
+        print(json.dumps({"node_id": args.node_id, "force_reclaim": True, **result}))
+    else:
+        n = release_locks_for_node(run_dir, args.node_id)
+        print(json.dumps({"node_id": args.node_id, "released": n, "force_reclaim": False}))
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Kernel Bridge driver (Stages 0-3)")
+    parser.add_argument("--run-dir", required=True)
+    parser.add_argument("--node-id", required=True)
+    sub = parser.add_subparsers(dest="command", required=True)
+
+    p_exec = sub.add_parser("exec")
+    p_exec.add_argument("code")
+    p_exec.set_defaults(func=cmd_exec)
+
+    p_list = sub.add_parser("list")
+    p_list.set_defaults(func=cmd_list)
+
+    p_teardown = sub.add_parser("teardown")
+    p_teardown.set_defaults(func=cmd_teardown)
+
+    p_spawn = sub.add_parser("spawn")
+    p_spawn.add_argument("--model", default="auto")
+    p_spawn.add_argument("--prompt", required=True)
+    p_spawn.add_argument("--owns", action="append", default=[])
+    p_spawn.add_argument("--dry-run", action="store_true")
+    p_spawn.add_argument("--max-depth", type=int, default=KERNEL_MAX_DEPTH_DEFAULT)
+    p_spawn.add_argument(
+        "--parent-child-id", default=None,
+        help="Set when this spawn is issued by a previously admitted child recursing further, "
+             "not by the DAG node directly. Depth = that child's depth + 1. Omit for ordinary "
+             "sibling spawns from the node itself, which always resolve to depth 1.",
+    )
+    p_spawn.set_defaults(func=cmd_spawn)
+
+    p_read = sub.add_parser("read")
+    p_read.add_argument("child_id")
+    p_read.set_defaults(func=cmd_read)
+
+    p_locks = sub.add_parser("release-locks")
+    p_locks.add_argument("--force-reclaim", action="store_true")
+    p_locks.set_defaults(func=cmd_release_locks)
+
+    p_spawn_kill = sub.add_parser("spawn-kill")
+    p_spawn_kill.add_argument("child_id")
+    p_spawn_kill.add_argument("--reason", default="manual")
+    p_spawn_kill.set_defaults(func=cmd_spawn_kill)
+
+    args = parser.parse_args()
+    try:
+        validate_identifier(args.node_id, "node_id")
+    except ValueError as e:
+        print(json.dumps({"status": "rejected", "reason": "invalid_node_id", "error": str(e)}))
+        sys.exit(1)
+    args.func(args)
+
+
+if __name__ == "__main__":
+    main()

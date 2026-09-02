@@ -1,0 +1,2 @@
+# The canonical bridge is deliberately standard-library-only.
+# Python 3.10+ is enforced by bridge-launcher.mjs discovery, not installed.

@@ -1,0 +1,2 @@
+# Installed shim manifests bind exact bytes; keep them stable across platforms.
+/.orchestrator/kernel-bridge/* text eol=lf

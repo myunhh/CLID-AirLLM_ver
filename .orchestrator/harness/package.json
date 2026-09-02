@@ -1,0 +1,12 @@
+{
+  "name": "@ecc/orchestration-harness",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test:a": "node --test tests/event-store.test.mjs tests/path-identity.test.mjs",
+    "test:light": "node --test tests/usage-ledger.test.mjs tests/provider-usage.test.mjs tests/execution-profile.test.mjs tests/capsule-preflight.test.mjs tests/evidence-digest.test.mjs tests/command-worker.test.mjs"
+  }
+}

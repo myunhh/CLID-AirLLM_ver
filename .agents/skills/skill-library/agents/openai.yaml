@@ -1,0 +1,3 @@
+interface:
+  display_name: "Skill Library"
+  short_description: "Attach project or plugin skills on demand"

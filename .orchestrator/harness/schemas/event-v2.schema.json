@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "event-v2.schema.json",
+  "title": "ECC Harness Event v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "seq", "runId", "type", "timestamp", "producer", "authority", "data", "prevEventHash", "eventHash"],
+  "properties": {
+    "schemaVersion": { "const": 2 },
+    "seq": { "type": "integer", "minimum": 1 },
+    "runId": { "type": "string", "minLength": 1 },
+    "type": { "type": "string", "minLength": 1 },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "producer": { "type": "string", "minLength": 1 },
+    "authority": { "type": "string", "minLength": 1 },
+    "data": { "$ref": "#/$defs/safeObject" },
+    "prevEventHash": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "eventHash": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+  },
+  "$defs": {
+    "safeObject": {
+      "type": "object",
+      "propertyNames": {
+        "not": { "enum": ["prompt", "rawPrompt", "reply", "rawReply", "output", "content", "message", "text"] }
+      },
+      "additionalProperties": { "$ref": "#/$defs/safeValue" }
+    },
+    "safeValue": {
+      "anyOf": [
+        { "type": ["null", "boolean", "number", "string"] },
+        { "$ref": "#/$defs/safeObject" },
+        { "type": "array", "items": { "$ref": "#/$defs/safeValue" } }
+      ]
+    }
+  }
+}

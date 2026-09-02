@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 2,
+  "runId": "fixture-human-run",
+  "builders": ["builder-1"],
+  "judges": ["judge-1"],
+  "nodes": [{
+    "id": "worker",
+    "dependsOn": [],
+    "acceptance": ["result is independently verified"],
+    "builderIds": ["builder-1"],
+    "judgeNonce": "judge-nonce-1",
+    "resultArtifactRef": "artifacts/result.txt",
+    "budgets": {"tokens": 1000, "toolCalls": 20, "wallSeconds": 60, "processes": 1}
+  }],
+  "humanGates": [{"id": "release", "actionDigest": "37ee5652f7bc2df36f643ab4b9b53acec35ba71d24144d37db7270b8d1a3f22d", "gateNonce": "human-nonce-1"}]
+}

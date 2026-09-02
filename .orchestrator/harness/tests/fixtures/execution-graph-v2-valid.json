@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 2,
+  "runId": "fixture-v2-run",
+  "builders": ["builder-1"],
+  "judges": ["judge-1"],
+  "nodes": [{
+    "id": "worker",
+    "dependsOn": [],
+    "acceptance": ["result is independently verified"],
+    "builderIds": ["builder-1"],
+    "judgeNonce": "judge-nonce-1",
+    "resultArtifactRef": "artifacts/result.txt",
+    "budgets": {"tokens": 1000, "toolCalls": 20, "wallSeconds": 60, "processes": 1}
+  }]
+}

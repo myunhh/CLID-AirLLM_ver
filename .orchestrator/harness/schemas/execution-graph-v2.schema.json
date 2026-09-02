@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "execution-graph-v2.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "runId", "builders", "judges", "nodes"],
+  "properties": {
+    "schemaVersion": {"const": 2},
+    "runId": {"type": "string", "minLength": 1},
+    "builders": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "judges": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "nodes": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/node"}},
+    "humanGates": {"type": "array", "items": {"$ref": "#/$defs/gate"}}
+  },
+  "$defs": {
+    "budget": {"type": "object", "additionalProperties": false, "required": ["tokens", "toolCalls", "wallSeconds", "processes"], "properties": {"tokens": {"type": "integer", "minimum": 1}, "toolCalls": {"type": "integer", "minimum": 1}, "wallSeconds": {"type": "integer", "minimum": 1}, "processes": {"type": "integer", "minimum": 1}}},
+    "node": {"type": "object", "required": ["id", "dependsOn", "acceptance", "builderIds", "judgeNonce", "resultArtifactRef", "budgets"], "properties": {"id": {"type": "string", "minLength": 1}, "dependsOn": {"type": "array", "items": {"type": "string"}}, "acceptance": {"type": "array", "minItems": 1, "items": {"type": "string"}}, "builderIds": {"type": "array", "minItems": 1, "items": {"type": "string"}}, "judgeNonce": {"type": "string", "minLength": 1}, "resultArtifactRef": {"type": "string", "minLength": 1}, "budgets": {"$ref": "#/$defs/budget"}}, "additionalProperties": true},
+    "gate": {"type": "object", "additionalProperties": false, "required": ["id", "actionDigest", "gateNonce"], "properties": {"id": {"type": "string", "minLength": 1}, "actionDigest": {"type": "string", "pattern": "^[0-9a-f]{64}$"}, "gateNonce": {"type": "string", "minLength": 1}}}
+  }
+}

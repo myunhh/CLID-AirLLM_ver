@@ -1,0 +1,29 @@
+# Project-safe overrides. MCP servers and credentials remain in the global config.
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+model = "gpt-5.6-sol"
+
+[agents]
+enabled = true
+max_concurrent_threads_per_session = 3
+max_depth = 1
+
+[agents.explorer]
+description = "Read-only codebase explorer for targeted evidence gathering."
+config_file = "agents/explorer.toml"
+
+[agents.reviewer]
+description = "Read-only reviewer for correctness, security, and test risks."
+config_file = "agents/reviewer.toml"
+
+[agents.docs_researcher]
+description = "Documentation specialist for API and release-note verification."
+config_file = "agents/docs-researcher.toml"
+
+[agents.worker]
+description = "Bounded implementation worker for scoped product changes."
+config_file = "agents/worker.toml"
+
+[agents.judge]
+description = "Independent read-only judge for deterministic acceptance checks."
+config_file = "agents/judge.toml"

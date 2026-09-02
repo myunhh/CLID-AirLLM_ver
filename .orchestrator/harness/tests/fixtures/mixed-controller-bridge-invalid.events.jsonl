@@ -1,0 +1,2 @@
+{"seq":1,"type":"run_initialized","runId":"legacy-controller-run","definitionHash":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","timestamp":"2026-09-02T00:00:00.000Z","prevEventHash":null,"eventHash":"ca425805f2d19976166626704ba0dddc51272d0868718a22425432d713a6462a"}
+{"seq":1,"type":"admission","runId":"legacy-bridge-run","node_id":"worker","child_id":"child-1","model":"gpt-5.6-terra","kernelParent":"root","kernelDepth":1,"prevDigest":"genesis","digest":"d56ed3a542649d9b30f1969f8e1750dda433b1a449fe9be773aeb57a0301784d"}

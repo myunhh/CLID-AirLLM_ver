@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "evidence-digest-v1.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["metric", "math", "unit", "sourceHash", "exitStatus", "anomalyFlags", "rereadHandle"],
+  "properties": {
+    "metric": {"type": "string", "minLength": 1}, "math": {"type": "object", "additionalProperties": false, "required": ["numerator", "denominator", "formula", "rounding"], "properties": {"numerator": {"type": "number"}, "denominator": {"type": "number", "not": {"const": 0}}, "formula": {"type": "string", "minLength": 1}, "rounding": {"type": "string", "minLength": 1}}}, "unit": {"type": "string", "minLength": 1},
+    "sourceHash": {"type": "string", "pattern": "^[0-9a-f]{64}$"}, "exitStatus": {"type": "integer"},
+    "anomalyFlags": {"type": "array", "items": {"type": "string"}}, "rereadHandle": {"type": "string", "minLength": 1}
+  }
+}

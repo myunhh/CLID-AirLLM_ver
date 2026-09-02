@@ -1,0 +1,1292 @@
+{
+  "schema_version": 2,
+  "generated_on": "2026-09-01",
+  "protected_paths": [
+    "C:/Users/picom/.codex/skills/.system",
+    "C:/Users/picom/AppData/Roaming/orca/codex-runtime-home/home/plugins/cache"
+  ],
+  "notes": [
+    "Restore only after checking destination conflicts.",
+    "Junction entries can be restored by moving rollback_junction_path back to original_path; materialized library copies may be retained."
+  ],
+  "daily_moves": [
+    {
+      "name": "ast-grep",
+      "operation": "move-then-rehome",
+      "original_path": ".skills/lazycodex/ast-grep",
+      "current_path": ".skills/library/ast-grep",
+      "file_count": 17,
+      "tree_sha256": "f0d9a2195acdf929ac0161158426a198a10a878647933a7e22a8f173fe19615e",
+      "previous_current_path": ".agents/skills/ast-grep"
+    },
+    {
+      "name": "coding-agent-sessions",
+      "operation": "move-then-rehome",
+      "original_path": ".skills/lazycodex/coding-agent-sessions",
+      "current_path": ".skills/library/coding-agent-sessions",
+      "file_count": 24,
+      "tree_sha256": "b8d0ce4f1aab90aa23bc660a4b1e8fa824b2ca90cac76ad66059b9da5c8af2bc",
+      "previous_current_path": ".agents/skills/coding-agent-sessions"
+    },
+    {
+      "name": "comment-checker",
+      "operation": "move",
+      "original_path": ".skills/lazycodex/comment-checker",
+      "current_path": ".agents/skills/comment-checker",
+      "file_count": 2,
+      "tree_sha256": "ab78c821bf354a60299a7a04912ba322c054bc30880ab0f0660c32f191e17509"
+    },
+    {
+      "name": "data-scientist",
+      "operation": "move-then-rehome",
+      "original_path": ".skills/lazycodex/data-scientist",
+      "current_path": ".skills/library/data-scientist",
+      "file_count": 10,
+      "tree_sha256": "b3a786795cf8777ca0e72f335211e82b2bb27788ea9aa69ab8c7dc8d875f9cf7",
+      "previous_current_path": ".agents/skills/data-scientist"
+    },
+    {
+      "name": "debugging",
+      "operation": "move-then-rehome",
+      "original_path": ".skills/lazycodex/debugging",
+      "current_path": ".skills/library/debugging",
+      "file_count": 21,
+      "tree_sha256": "53541615ba4795ea9bcd7442d905bef0837ec5304f8e20bc5b2ab2e81e1a6f4e",
+      "previous_current_path": ".agents/skills/debugging"
+    },
+    {
+      "name": "frontend",
+      "operation": "move-then-rehome",
+      "original_path": ".skills/lazycodex/frontend",
+      "current_path": ".skills/library/frontend",
+      "file_count": 173,
+      "tree_sha256": "03373797e8660d2706d4b5229e547a48f86fe7c00b6b10fb90c66cfdfecc577a",
+      "previous_current_path": ".agents/skills/frontend"
+    },
+    {
+      "name": "git-master",
+      "operation": "move-then-rehome",
+      "original_path": ".skills/lazycodex/git-master",
+      "current_path": ".skills/library/git-master",
+      "file_count": 2,
+      "tree_sha256": "683ed6adda17a4dcccca180c1cfd0091b7f2bff88f41b51e9af637fb5f9c750a",
+      "previous_current_path": ".agents/skills/git-master"
+    },
+    {
+      "name": "graphify",
+      "operation": "move",
+      "original_path": ".skills/graphify",
+      "current_path": ".agents/skills/graphify",
+      "file_count": 9,
+      "tree_sha256": "ff426afc3ef9ccc803b1652700cf8665c7409696b1613261d7de03bc7065d73c"
+    },
+    {
+      "name": "init-deep",
+      "operation": "move-then-rehome",
+      "original_path": ".skills/lazycodex/init-deep",
+      "current_path": ".skills/library/init-deep",
+      "file_count": 2,
+      "tree_sha256": "1248ab4becba0358b17b9efe480f410671ec02001cefead6fac8e29555a4fe4f",
+      "previous_current_path": ".agents/skills/init-deep"
+    },
+    {
+      "name": "lcx-contribute-bug-fix",
+      "operation": "move-then-rehome",
+      "original_path": ".skills/lazycodex/lcx-contribute-bug-fix",
+      "current_path": ".skills/library/lcx-contribute-bug-fix",
+      "file_count": 3,
+      "tree_sha256": "b00b2d6a2c56658e2398b9d24a1e797ed4de23011c4ab7afeb89d1bd439b9b48",
+      "previous_current_path": ".agents/skills/lcx-contribute-bug-fix"
+    },
+    {
+      "name": "lcx-doctor",
+      "operation": "move-then-rehome",
+      "original_path": ".skills/lazycodex/lcx-doctor",
+      "current_path": ".skills/library/lcx-doctor",
+      "file_count": 2,
+      "tree_sha256": "dad822a149dbe8b1893000d4228ffdc0a243916762dd219d63074f5e8ea6064b",
+      "previous_current_path": ".agents/skills/lcx-doctor"
+    },
+    {
+      "name": "lcx-report-bug",
+      "operation": "move-then-rehome",
+      "original_path": ".skills/lazycodex/lcx-report-bug",
+      "current_path": ".skills/library/lcx-report-bug",
+      "file_count": 2,
+      "tree_sha256": "16012e0460328637c2b24627730392bee79ad5d92fa810b367e55c8df207762c",
+      "previous_current_path": ".agents/skills/lcx-report-bug"
+    },
+    {
+      "name": "lsp",
+      "operation": "move",
+      "original_path": ".skills/lazycodex/lsp",
+      "current_path": ".agents/skills/lsp",
+      "file_count": 2,
+      "tree_sha256": "98a915226bad4061d5f0bf15c403da9062014e85814dda56141af619e659a787"
+    },
+    {
+      "name": "lsp-setup",
+      "operation": "move-then-rehome",
+      "original_path": ".skills/lazycodex/lsp-setup",
+      "current_path": ".skills/library/lsp-setup",
+      "file_count": 26,
+      "tree_sha256": "89095b8e48400937bcee19cd8b1042e804378fa97f47af7dd4d9ce3aaa1d54c9",
+      "previous_current_path": ".agents/skills/lsp-setup"
+    },
+    {
+      "name": "programming",
+      "operation": "move-then-rehome",
+      "original_path": ".skills/lazycodex/programming",
+      "current_path": ".skills/library/programming",
+      "file_count": 75,
+      "tree_sha256": "fd7d53e18dd38b3d8ad7d40e2b45b22a10e74ab6a255dff244712981ac835be7",
+      "previous_current_path": ".agents/skills/programming"
+    },
+    {
+      "name": "refactor",
+      "operation": "move-then-rehome",
+      "original_path": ".skills/lazycodex/refactor",
+      "current_path": ".skills/library/refactor",
+      "file_count": 2,
+      "tree_sha256": "d515cf0875d704ad7688b9b4c8d52d18520949917873c8b5332ad174225335db",
+      "previous_current_path": ".agents/skills/refactor"
+    },
+    {
+      "name": "remove-ai-slops",
+      "operation": "move-then-rehome",
+      "original_path": ".skills/lazycodex/remove-ai-slops",
+      "current_path": ".skills/library/remove-ai-slops",
+      "file_count": 2,
+      "tree_sha256": "c3c655be2aee0d6f40dde5fba272beae77896513666f840df68681e42a60a534",
+      "previous_current_path": ".agents/skills/remove-ai-slops"
+    },
+    {
+      "name": "review-work",
+      "operation": "move-then-rehome",
+      "original_path": ".skills/lazycodex/review-work",
+      "current_path": ".skills/library/review-work",
+      "file_count": 2,
+      "tree_sha256": "9b5a77a2b38da492f465d78ee8d7ee5e28274412d0705c4fed79f88803197db6",
+      "previous_current_path": ".agents/skills/review-work"
+    },
+    {
+      "name": "rules",
+      "operation": "move",
+      "original_path": ".skills/lazycodex/rules",
+      "current_path": ".agents/skills/rules",
+      "file_count": 2,
+      "tree_sha256": "72646ff02ea4cbfeae3721591917b9ae5f0a8960c7d10adb83678c2c022efe66"
+    },
+    {
+      "name": "start-work",
+      "operation": "move",
+      "original_path": ".skills/lazycodex/start-work",
+      "current_path": ".agents/skills/start-work",
+      "file_count": 2,
+      "tree_sha256": "f5f0331fddbf3642764df0542bb16305a1c01f5dad621b155674d9362a32f7de"
+    },
+    {
+      "name": "teammode",
+      "operation": "move",
+      "original_path": ".skills/lazycodex/teammode",
+      "current_path": ".agents/skills/teammode",
+      "file_count": 7,
+      "tree_sha256": "a561a4fcef0b08c8be6860446fa8b757bbadcc8938a0c0801c6d7ccac220bcaf"
+    },
+    {
+      "name": "ultimate-browsing",
+      "operation": "move-then-rehome",
+      "original_path": ".skills/lazycodex/ultimate-browsing",
+      "current_path": ".skills/library/ultimate-browsing",
+      "file_count": 46,
+      "tree_sha256": "ccb0a3dd1b4a2eab890e97c22f205fc7c612a620820236e38ab64ccd2194cee7",
+      "previous_current_path": ".agents/skills/ultimate-browsing"
+    },
+    {
+      "name": "ultrawork",
+      "operation": "move",
+      "original_path": ".skills/lazycodex/ultrawork",
+      "current_path": ".agents/skills/ultrawork",
+      "file_count": 2,
+      "tree_sha256": "323ff0b600c4123cc5ec4131b1fc16f9c0d43afbc8853f7ca1b79065356034b2"
+    },
+    {
+      "name": "ulw-loop",
+      "operation": "move",
+      "original_path": ".skills/lazycodex/ulw-loop",
+      "current_path": ".agents/skills/ulw-loop",
+      "file_count": 4,
+      "tree_sha256": "62834698fd64e4736cbd20c9e0ffbfc7215244c5e1da561fecee856979351d02"
+    },
+    {
+      "name": "ulw-plan",
+      "operation": "move-then-rehome",
+      "original_path": ".skills/lazycodex/ulw-plan",
+      "current_path": ".skills/library/ulw-plan",
+      "file_count": 6,
+      "tree_sha256": "0ba5d5eb4097548076762d7a7897f458711d1273ce30742caadb0455fa10dafe",
+      "previous_current_path": ".agents/skills/ulw-plan"
+    },
+    {
+      "name": "ulw-research",
+      "operation": "move-then-rehome",
+      "original_path": ".skills/lazycodex/ulw-research",
+      "current_path": ".skills/library/ulw-research",
+      "file_count": 3,
+      "tree_sha256": "c9e0e8f613cbd27b642d2392af772a85af07a2ff511cacd4e35fa1048d0a2a60",
+      "previous_current_path": ".agents/skills/ulw-research"
+    },
+    {
+      "name": "visual-qa",
+      "operation": "move-then-rehome",
+      "original_path": ".skills/lazycodex/visual-qa",
+      "current_path": ".skills/library/visual-qa",
+      "file_count": 13,
+      "tree_sha256": "a9b8d42daf6198cdf0912562163fa68d0606fcad0ba33bb0acd5d0dd29d98726",
+      "previous_current_path": ".agents/skills/visual-qa"
+    }
+  ],
+  "codex_user_moves": [
+    {
+      "name": "agent-introspection-debugging",
+      "operation": "move",
+      "original_path": "C:/Users/picom/.codex/skills/agent-introspection-debugging",
+      "current_path": ".skills/archive/alternate-variants/codex-user/agent-introspection-debugging",
+      "file_count": 1,
+      "tree_sha256": "f99b431ab5bab6bac42fec270f4ec3b66be2ae3a628703e297f84e842e2a74b5"
+    },
+    {
+      "name": "agent-self-evaluation",
+      "operation": "move",
+      "original_path": "C:/Users/picom/.codex/skills/agent-self-evaluation",
+      "current_path": ".skills/library/agent-self-evaluation",
+      "file_count": 7,
+      "tree_sha256": "15379ea1b52f4f57d33c130cd13fed6c79fff98c4223c0b9151b594812391429"
+    },
+    {
+      "name": "agent-sort",
+      "operation": "move",
+      "original_path": "C:/Users/picom/.codex/skills/agent-sort",
+      "current_path": ".skills/archive/alternate-variants/codex-user/agent-sort",
+      "file_count": 1,
+      "tree_sha256": "2b238f2b072f1b8d4a0a3ed4aa4b41b9ddd0325566536af8b8e4c9511e599b8d"
+    },
+    {
+      "name": "ai-regression-testing",
+      "operation": "move",
+      "original_path": "C:/Users/picom/.codex/skills/ai-regression-testing",
+      "current_path": ".skills/library/ai-regression-testing",
+      "file_count": 1,
+      "tree_sha256": "ef2e2eba6c0c9efb93a484a384b1c793ecccc1d40ec518d6dae2984c9451ee80"
+    },
+    {
+      "name": "architecture-decision-records",
+      "operation": "move",
+      "original_path": "C:/Users/picom/.codex/skills/architecture-decision-records",
+      "current_path": ".skills/library/architecture-decision-records",
+      "file_count": 1,
+      "tree_sha256": "d41790dcbf9123fa54361cfcc4bcd2783191b2bff27e8ce2d352d3ab09c16282"
+    },
+    {
+      "name": "browser-qa",
+      "operation": "move",
+      "original_path": "C:/Users/picom/.codex/skills/browser-qa",
+      "current_path": ".skills/library/browser-qa",
+      "file_count": 1,
+      "tree_sha256": "ce200ac4f71070001eb00ee2ee8033ac6997ceb30f09018b515342d7676ab40a"
+    },
+    {
+      "name": "ck",
+      "operation": "move",
+      "original_path": "C:/Users/picom/.codex/skills/ck",
+      "current_path": ".skills/library/ck",
+      "file_count": 10,
+      "tree_sha256": "e58345ba890bf4aea6d4ded11c158c7643bbf4f86ce7473920b60308e5b21784"
+    },
+    {
+      "name": "click-path-audit",
+      "operation": "move",
+      "original_path": "C:/Users/picom/.codex/skills/click-path-audit",
+      "current_path": ".skills/library/click-path-audit",
+      "file_count": 1,
+      "tree_sha256": "ee10d532e559ce615a9545c146561e57e26c92450b925c3e3d364acb2f6778c3"
+    },
+    {
+      "name": "clickhouse-io",
+      "operation": "move",
+      "original_path": "C:/Users/picom/.codex/skills/clickhouse-io",
+      "current_path": ".skills/library/clickhouse-io",
+      "file_count": 1,
+      "tree_sha256": "a757612ad2879384d4cc479023b385e30828c1f14bca8da5679eb650b2c7b473"
+    },
+    {
+      "name": "code-tour",
+      "operation": "move",
+      "original_path": "C:/Users/picom/.codex/skills/code-tour",
+      "current_path": ".skills/library/code-tour",
+      "file_count": 1,
+      "tree_sha256": "f205cd06958468e9248fa15d43857bcb9f21ef312cbb3779ff818cb87e272f40"
+    },
+    {
+      "name": "codebase-onboarding",
+      "operation": "move",
+      "original_path": "C:/Users/picom/.codex/skills/codebase-onboarding",
+      "current_path": ".skills/library/codebase-onboarding",
+      "file_count": 1,
+      "tree_sha256": "75073a1af9be73ac3f7cdb00c49907fce02ae115a5d4ae633d16cc41b4ce78f0"
+    },
+    {
+      "name": "codehealth-mcp",
+      "operation": "move",
+      "original_path": "C:/Users/picom/.codex/skills/codehealth-mcp",
+      "current_path": ".skills/library/codehealth-mcp",
+      "file_count": 1,
+      "tree_sha256": "611662ba7cfdb3ad7d7ba63a3336753037fe92c84fb1c16e7f5a619364d993e0"
+    },
+    {
+      "name": "config-gc",
+      "operation": "move",
+      "original_path": "C:/Users/picom/.codex/skills/config-gc",
+      "current_path": ".skills/library/config-gc",
+      "file_count": 1,
+      "tree_sha256": "950a1989204698b8475cfc1032ee01b5248a74a47e61593e3bcd869f7c6e4995"
+    },
+    {
+      "name": "configure-ecc",
+      "operation": "move",
+      "original_path": "C:/Users/picom/.codex/skills/configure-ecc",
+      "current_path": ".skills/library/configure-ecc",
+      "file_count": 1,
+      "tree_sha256": "4e80f8c015175b8da942e73d9d33e657387d31e8d835b240e6463279e6787b29"
+    },
+    {
+      "name": "context-budget",
+      "operation": "move",
+      "original_path": "C:/Users/picom/.codex/skills/context-budget",
+      "current_path": ".skills/library/context-budget",
+      "file_count": 1,
+      "tree_sha256": "3e1abcd3a00783dcadebed979542c6371977510a418cc7cc2d4a6f09ebe9c421"
+    },
+    {
+      "name": "continuous-learning",
+      "operation": "move",
+      "original_path": "C:/Users/picom/.codex/skills/continuous-learning",
+      "current_path": ".skills/library/continuous-learning",
+      "file_count": 3,
+      "tree_sha256": "2285a8641a618a090574dda7e638880b69acd6b249de6cf8c0c8a648a0e096d9"
+    },
+    {
+      "name": "continuous-learning-v2",
+      "operation": "move",
+      "original_path": "C:/Users/picom/.codex/skills/continuous-learning-v2",
+      "current_path": ".skills/library/continuous-learning-v2",
+      "file_count": 12,
+      "tree_sha256": "8c52d354bfcb9781a7f5e676f8d3e99778aaed1d1ae1a7d0cd96d82c9c6f2aa1"
+    },
+    {
+      "name": "council",
+      "operation": "move",
+      "original_path": "C:/Users/picom/.codex/skills/council",
+      "current_path": ".skills/library/council",
+      "file_count": 1,
+      "tree_sha256": "5374a55a9de54a8d503304d9a6f6a0f01f586ae54543eb1378653c7cff9cc4f6"
+    },
+    {
+      "name": "database-migrations",
+      "operation": "move",
+      "original_path": "C:/Users/picom/.codex/skills/database-migrations",
+      "current_path": ".skills/library/database-migrations",
+      "file_count": 1,
+      "tree_sha256": "639ec79bb95f52d97e3fdae20ef4452c3ac159a6b61c69c779f3d6c251a272db"
+    },
+    {
+      "name": "delivery-gate",
+      "operation": "move",
+      "original_path": "C:/Users/picom/.codex/skills/delivery-gate",
+      "current_path": ".skills/library/delivery-gate",
+      "file_count": 2,
+      "tree_sha256": "e3a75cfa93924621471984cede446135b8f6b031b9201b9521c5591e8ad2426f"
+    },
+    {
+      "name": "e2e-testing",
+      "operation": "move",
+      "original_path": "C:/Users/picom/.codex/skills/e2e-testing",
+      "current_path": ".skills/archive/alternate-variants/codex-user/e2e-testing",
+      "file_count": 1,
+      "tree_sha256": "d13506f48f9fd888c51fc0a4ab3dbd1d09fb65e71815152c79ef5a1f8af475e6"
+    },
+    {
+      "name": "ecc-guide",
+      "operation": "move",
+      "original_path": "C:/Users/picom/.codex/skills/ecc-guide",
+      "current_path": ".skills/library/ecc-guide",
+      "file_count": 1,
+      "tree_sha256": "3ba43da7bb4c0b1c63575d2aabbcee71151cbc7c6215840c1d9897b339ef6b5d"
+    },
+    {
+      "name": "ecc-recipes",
+      "operation": "move",
+      "original_path": "C:/Users/picom/.codex/skills/ecc-recipes",
+      "current_path": ".skills/library/ecc-recipes",
+      "file_count": 1,
+      "tree_sha256": "fdfd9c90dd74e179c4b04cf247dd78b825da3707af2003ae2c04fb898a476d9e"
+    },
+    {
+      "name": "error-handling",
+      "operation": "move",
+      "original_path": "C:/Users/picom/.codex/skills/error-handling",
+      "current_path": ".skills/library/error-handling",
+      "file_count": 1,
+      "tree_sha256": "e8378c36f580093ebc561ab89d465324a1530069f3a70045eb1bebe6a8f3091f"
+    },
+    {
+      "name": "eval-harness",
+      "operation": "move",
+      "original_path": "C:/Users/picom/.codex/skills/eval-harness",
+      "current_path": ".skills/library/eval-harness",
+      "file_count": 1,
+      "tree_sha256": "f162fc11f80ee655af048bcf662919d1b30f3fda920400d997a389a30a85efe9"
+    },
+    {
+      "name": "git-workflow",
+      "operation": "move",
+      "original_path": "C:/Users/picom/.codex/skills/git-workflow",
+      "current_path": ".skills/library/git-workflow",
+      "file_count": 1,
+      "tree_sha256": "d078ef32b6868a15b40eadd8b3530a2a69148e78e3921806a107ef606f0f17a4"
+    },
+    {
+      "name": "graphify",
+      "operation": "move",
+      "original_path": "C:/Users/picom/.codex/skills/graphify",
+      "current_path": ".skills/archive/alternate-variants/codex-user/graphify",
+      "file_count": 10,
+      "tree_sha256": "660660d0c1815e589f6cbaf2fb07f96209969a0815d96e9120a32ab0f9c5dbae"
+    },
+    {
+      "name": "grill-me",
+      "operation": "move",
+      "original_path": "C:/Users/picom/.codex/skills/grill-me",
+      "current_path": ".skills/library/grill-me",
+      "file_count": 2,
+      "tree_sha256": "a959e72a6f78e4989d4a88358559bdaa8b62b465f9d49c4997e4cb7c93564541"
+    },
+    {
+      "name": "grilling",
+      "operation": "move",
+      "original_path": "C:/Users/picom/.codex/skills/grilling",
+      "current_path": ".skills/library/grilling",
+      "file_count": 2,
+      "tree_sha256": "082139663e77949af35cb9ed30201751fc5c8853fefa863d24847e905d65b177"
+    },
+    {
+      "name": "growth-log",
+      "operation": "move",
+      "original_path": "C:/Users/picom/.codex/skills/growth-log",
+      "current_path": ".skills/library/growth-log",
+      "file_count": 1,
+      "tree_sha256": "5a76a85158b2407afcdb0554078db636270f5aa0e4e6808b8f161bcb2be39436"
+    },
+    {
+      "name": "hookify-rules",
+      "operation": "move",
+      "original_path": "C:/Users/picom/.codex/skills/hookify-rules",
+      "current_path": ".skills/library/hookify-rules",
+      "file_count": 1,
+      "tree_sha256": "1c02349d4614d1222ed89b75c6247f84cd2dbd4ae555ca08fea096a76ceeffdf"
+    },
+    {
+      "name": "inherit-legacy-style",
+      "operation": "move",
+      "original_path": "C:/Users/picom/.codex/skills/inherit-legacy-style",
+      "current_path": ".skills/library/inherit-legacy-style",
+      "file_count": 1,
+      "tree_sha256": "fec05bbe036c40331e3094c64b87e81a3f2ea2ade923ab74a878e968b4b56139"
+    },
+    {
+      "name": "intent-driven-development",
+      "operation": "move",
+      "original_path": "C:/Users/picom/.codex/skills/intent-driven-development",
+      "current_path": ".skills/library/intent-driven-development",
+      "file_count": 1,
+      "tree_sha256": "d8e2814f880a1a497a5cdf020db8f68ab0b507d8c94090533e2b769b820e42dc"
+    },
+    {
+      "name": "iterative-retrieval",
+      "operation": "move",
+      "original_path": "C:/Users/picom/.codex/skills/iterative-retrieval",
+      "current_path": ".skills/library/iterative-retrieval",
+      "file_count": 1,
+      "tree_sha256": "28eaaac837dd086f63ef26783e561afb1a282fb7579090dc3eaa020685c85475"
+    },
+    {
+      "name": "jpa-patterns",
+      "operation": "move",
+      "original_path": "C:/Users/picom/.codex/skills/jpa-patterns",
+      "current_path": ".skills/library/jpa-patterns",
+      "file_count": 1,
+      "tree_sha256": "e451914a30e4f4473bf65771c8eadd4a1fd658259058a531b55bc42384791292"
+    },
+    {
+      "name": "loop-design-check",
+      "operation": "move",
+      "original_path": "C:/Users/picom/.codex/skills/loop-design-check",
+      "current_path": ".skills/library/loop-design-check",
+      "file_count": 1,
+      "tree_sha256": "424bcec462ba59a06a0e02c7f7bdb4cff6d260cfb4db70cdc1598beb271eba41"
+    },
+    {
+      "name": "mysql-patterns",
+      "operation": "move",
+      "original_path": "C:/Users/picom/.codex/skills/mysql-patterns",
+      "current_path": ".skills/library/mysql-patterns",
+      "file_count": 1,
+      "tree_sha256": "c3224ae531c67af64d50cb295ac5c3bde23ffb710f05b13459a92681573d4de5"
+    },
+    {
+      "name": "plan-canvas",
+      "operation": "move",
+      "original_path": "C:/Users/picom/.codex/skills/plan-canvas",
+      "current_path": ".skills/archive/alternate-variants/codex-user/plan-canvas",
+      "file_count": 1,
+      "tree_sha256": "77d6746857fc993ae346e141901efd55f3b50591c278fec94ce61dc428c6785a"
+    },
+    {
+      "name": "plankton-code-quality",
+      "operation": "move",
+      "original_path": "C:/Users/picom/.codex/skills/plankton-code-quality",
+      "current_path": ".skills/library/plankton-code-quality",
+      "file_count": 1,
+      "tree_sha256": "8360cde108ed6102afc16c6f1b348d2fcc78c23acdf2937278043a13fa224178"
+    },
+    {
+      "name": "postgres-patterns",
+      "operation": "move",
+      "original_path": "C:/Users/picom/.codex/skills/postgres-patterns",
+      "current_path": ".skills/library/postgres-patterns",
+      "file_count": 1,
+      "tree_sha256": "f1083d9864da592d3be8040e7f5a7f85b935477b1186a7208ec410976974f130"
+    },
+    {
+      "name": "prisma-patterns",
+      "operation": "move",
+      "original_path": "C:/Users/picom/.codex/skills/prisma-patterns",
+      "current_path": ".skills/library/prisma-patterns",
+      "file_count": 1,
+      "tree_sha256": "1f9b7ad6f645dd41f5d1dae66f351d0c01a90d68b96981fd9bff40762832ec59"
+    },
+    {
+      "name": "product-lens",
+      "operation": "move",
+      "original_path": "C:/Users/picom/.codex/skills/product-lens",
+      "current_path": ".skills/library/product-lens",
+      "file_count": 1,
+      "tree_sha256": "d3c2d9bc4142d9437220259eb2927798ccd8061f1b188401e6d0f78d3e691c4c"
+    },
+    {
+      "name": "production-audit",
+      "operation": "move",
+      "original_path": "C:/Users/picom/.codex/skills/production-audit",
+      "current_path": ".skills/library/production-audit",
+      "file_count": 1,
+      "tree_sha256": "0e71a71fc3319931f0fd0751d3ac4388299989ffd51ff66dbcc1e6ba147ae9e7"
+    },
+    {
+      "name": "redis-patterns",
+      "operation": "move",
+      "original_path": "C:/Users/picom/.codex/skills/redis-patterns",
+      "current_path": ".skills/library/redis-patterns",
+      "file_count": 1,
+      "tree_sha256": "33bdba4fcc60302e1257121652ce87f51890c343dac075b213d66edd85a18404"
+    },
+    {
+      "name": "repo-scan",
+      "operation": "move",
+      "original_path": "C:/Users/picom/.codex/skills/repo-scan",
+      "current_path": ".skills/library/repo-scan",
+      "file_count": 1,
+      "tree_sha256": "a18aae3c4640137241af7bc775337cbf72b56b551b78595a3f3043ae7208bcf7"
+    },
+    {
+      "name": "rules-distill",
+      "operation": "move",
+      "original_path": "C:/Users/picom/.codex/skills/rules-distill",
+      "current_path": ".skills/library/rules-distill",
+      "file_count": 3,
+      "tree_sha256": "e4dea9a818d71875696ab1da5a5e81a2ef272bd849d8152ced88c6bde566b4d5"
+    },
+    {
+      "name": "santa-method",
+      "operation": "move",
+      "original_path": "C:/Users/picom/.codex/skills/santa-method",
+      "current_path": ".skills/library/santa-method",
+      "file_count": 1,
+      "tree_sha256": "7144426ab8cc575d54a5f979214c369a1349da0984dd1fef60612d838c1c7a05"
+    },
+    {
+      "name": "skill-scout",
+      "operation": "move",
+      "original_path": "C:/Users/picom/.codex/skills/skill-scout",
+      "current_path": ".skills/library/skill-scout",
+      "file_count": 1,
+      "tree_sha256": "243c459a6206f9cf6df2dd0e870f4030f47c0f7251d3290e0ccf2e721367ae8e"
+    },
+    {
+      "name": "skill-stocktake",
+      "operation": "move",
+      "original_path": "C:/Users/picom/.codex/skills/skill-stocktake",
+      "current_path": ".skills/library/skill-stocktake",
+      "file_count": 4,
+      "tree_sha256": "316a7ea4017fe3ffa32b5afcd59d55b508dd9b379d741f43bf9b8e75d2d175ee"
+    },
+    {
+      "name": "strategic-compact",
+      "operation": "move",
+      "original_path": "C:/Users/picom/.codex/skills/strategic-compact",
+      "current_path": ".skills/library/strategic-compact",
+      "file_count": 1,
+      "tree_sha256": "798267bc5808fe2daefd5cfbcd75e8c581e0c9a4ab2fc209645a408ea73f680a"
+    },
+    {
+      "name": "tdd-workflow",
+      "operation": "move",
+      "original_path": "C:/Users/picom/.codex/skills/tdd-workflow",
+      "current_path": ".skills/library/tdd-workflow",
+      "file_count": 1,
+      "tree_sha256": "376949cad1a32ba6f579507e2edd66727358ba656ab582ce9f6d86655cef008b"
+    },
+    {
+      "name": "unified-memory",
+      "operation": "move",
+      "original_path": "C:/Users/picom/.codex/skills/unified-memory",
+      "current_path": ".skills/archive/alternate-variants/codex-user/unified-memory",
+      "file_count": 1,
+      "tree_sha256": "0e3287650f73e27704b63876e03680ced53115e25fd25091c75fec09e2dc2ede"
+    },
+    {
+      "name": "verification-loop",
+      "operation": "move",
+      "original_path": "C:/Users/picom/.codex/skills/verification-loop",
+      "current_path": ".skills/library/verification-loop",
+      "file_count": 1,
+      "tree_sha256": "3e2782f504a65c82db85c58a0b7f206c08371b044bbf81c269c3f350a83ae7b1"
+    },
+    {
+      "name": "windows-desktop-e2e",
+      "operation": "move",
+      "original_path": "C:/Users/picom/.codex/skills/windows-desktop-e2e",
+      "current_path": ".skills/library/windows-desktop-e2e",
+      "file_count": 1,
+      "tree_sha256": "d84aa4df5d5be39a03ceb00a59a03b9c9f51ee501c9a30bf168735ff4f4f5445"
+    }
+  ],
+  "agents_user_moves": [
+    {
+      "name": "agent-introspection-debugging",
+      "operation": "materialize-copy-and-relocate-junction",
+      "original_path": "C:/Users/picom/.agents/skills/agent-introspection-debugging",
+      "current_path": ".skills/library/agent-introspection-debugging",
+      "rollback_junction_path": ".skills/rollback/agents-user-junctions/agent-introspection-debugging",
+      "junction_target": "C:/Users/picom/.claude/plugins/marketplaces/ecc/.agents/skills/agent-introspection-debugging",
+      "file_count": 2,
+      "tree_sha256": "8bd13ea46c3b2f5e8736da697b30f710096fc3cde3c2112ee39c72370fd01b39"
+    },
+    {
+      "name": "agent-sort",
+      "operation": "materialize-copy-and-relocate-junction",
+      "original_path": "C:/Users/picom/.agents/skills/agent-sort",
+      "current_path": ".skills/library/agent-sort",
+      "rollback_junction_path": ".skills/rollback/agents-user-junctions/agent-sort",
+      "junction_target": "C:/Users/picom/.claude/plugins/marketplaces/ecc/.agents/skills/agent-sort",
+      "file_count": 2,
+      "tree_sha256": "81f20a73407fa9aa552e8224dab11d1ab6761d480e35474c9545e8da0097eab1"
+    },
+    {
+      "name": "api-design",
+      "operation": "materialize-copy-and-relocate-junction",
+      "original_path": "C:/Users/picom/.agents/skills/api-design",
+      "current_path": ".skills/library/api-design",
+      "rollback_junction_path": ".skills/rollback/agents-user-junctions/api-design",
+      "junction_target": "C:/Users/picom/.claude/plugins/marketplaces/ecc/.agents/skills/api-design",
+      "file_count": 2,
+      "tree_sha256": "ad4cd62a9515522e6c413f0624b5116e9863a83502278cec6828025049e8600a"
+    },
+    {
+      "name": "article-writing",
+      "operation": "materialize-copy-and-relocate-junction",
+      "original_path": "C:/Users/picom/.agents/skills/article-writing",
+      "current_path": ".skills/library/article-writing",
+      "rollback_junction_path": ".skills/rollback/agents-user-junctions/article-writing",
+      "junction_target": "C:/Users/picom/.claude/plugins/marketplaces/ecc/.agents/skills/article-writing",
+      "file_count": 2,
+      "tree_sha256": "940b32bcee32b031141f90c236d7dfd930be0cfcd7740c04f0be7749a65e36fc"
+    },
+    {
+      "name": "backend-patterns",
+      "operation": "materialize-copy-and-relocate-junction",
+      "original_path": "C:/Users/picom/.agents/skills/backend-patterns",
+      "current_path": ".skills/library/backend-patterns",
+      "rollback_junction_path": ".skills/rollback/agents-user-junctions/backend-patterns",
+      "junction_target": "C:/Users/picom/.claude/plugins/marketplaces/ecc/.agents/skills/backend-patterns",
+      "file_count": 2,
+      "tree_sha256": "241b869e1ea1d3c9a11c7f77654d57bd2b1a8f36ebd6b01b41a88ddbe33d30e0"
+    },
+    {
+      "name": "benchmark-methodology",
+      "operation": "materialize-copy-and-relocate-junction",
+      "original_path": "C:/Users/picom/.agents/skills/benchmark-methodology",
+      "current_path": ".skills/library/benchmark-methodology",
+      "rollback_junction_path": ".skills/rollback/agents-user-junctions/benchmark-methodology",
+      "junction_target": "C:/Users/picom/.claude/plugins/marketplaces/ecc/.agents/skills/benchmark-methodology",
+      "file_count": 2,
+      "tree_sha256": "b5035148b46dc1138278fa18c55341cff220781a201914b7fe0cb156dd842d61"
+    },
+    {
+      "name": "brand-discovery",
+      "operation": "materialize-copy-and-relocate-junction",
+      "original_path": "C:/Users/picom/.agents/skills/brand-discovery",
+      "current_path": ".skills/library/brand-discovery",
+      "rollback_junction_path": ".skills/rollback/agents-user-junctions/brand-discovery",
+      "junction_target": "C:/Users/picom/.claude/plugins/marketplaces/ecc/.agents/skills/brand-discovery",
+      "file_count": 10,
+      "tree_sha256": "7a1fa673afab0834b414b60a61e142d47433be4db94d1a9f0ee6d301a1ed64e3"
+    },
+    {
+      "name": "brand-voice",
+      "operation": "materialize-copy-and-relocate-junction",
+      "original_path": "C:/Users/picom/.agents/skills/brand-voice",
+      "current_path": ".skills/library/brand-voice",
+      "rollback_junction_path": ".skills/rollback/agents-user-junctions/brand-voice",
+      "junction_target": "C:/Users/picom/.claude/plugins/marketplaces/ecc/.agents/skills/brand-voice",
+      "file_count": 3,
+      "tree_sha256": "1608f64e7c1fe37546f16b042e4ff9563db0213cce45bf0282e775e9ad26dc4e"
+    },
+    {
+      "name": "bun-runtime",
+      "operation": "materialize-copy-and-relocate-junction",
+      "original_path": "C:/Users/picom/.agents/skills/bun-runtime",
+      "current_path": ".skills/library/bun-runtime",
+      "rollback_junction_path": ".skills/rollback/agents-user-junctions/bun-runtime",
+      "junction_target": "C:/Users/picom/.claude/plugins/marketplaces/ecc/.agents/skills/bun-runtime",
+      "file_count": 2,
+      "tree_sha256": "7c976d309e3dfbea1d2cec04dd18be2a26d93cf502792cae7904df3252676565"
+    },
+    {
+      "name": "coding-standards",
+      "operation": "materialize-copy-and-relocate-junction",
+      "original_path": "C:/Users/picom/.agents/skills/coding-standards",
+      "current_path": ".skills/library/coding-standards",
+      "rollback_junction_path": ".skills/rollback/agents-user-junctions/coding-standards",
+      "junction_target": "C:/Users/picom/.claude/plugins/marketplaces/ecc/.agents/skills/coding-standards",
+      "file_count": 2,
+      "tree_sha256": "7d3270b1db04793e5a87686f2e311e48dc953aa072691caf025a71530367d8d5"
+    },
+    {
+      "name": "competitive-platform-analysis",
+      "operation": "materialize-copy-and-relocate-junction",
+      "original_path": "C:/Users/picom/.agents/skills/competitive-platform-analysis",
+      "current_path": ".skills/library/competitive-platform-analysis",
+      "rollback_junction_path": ".skills/rollback/agents-user-junctions/competitive-platform-analysis",
+      "junction_target": "C:/Users/picom/.claude/plugins/marketplaces/ecc/.agents/skills/competitive-platform-analysis",
+      "file_count": 2,
+      "tree_sha256": "6b0e44f7f916dba12d26db4cc690d29667167b20bb2a2d161b3be59650f02654"
+    },
+    {
+      "name": "competitive-report-structure",
+      "operation": "materialize-copy-and-relocate-junction",
+      "original_path": "C:/Users/picom/.agents/skills/competitive-report-structure",
+      "current_path": ".skills/library/competitive-report-structure",
+      "rollback_junction_path": ".skills/rollback/agents-user-junctions/competitive-report-structure",
+      "junction_target": "C:/Users/picom/.claude/plugins/marketplaces/ecc/.agents/skills/competitive-report-structure",
+      "file_count": 2,
+      "tree_sha256": "6dcc57ca6c8be50e18bb9fe807ca223fa88c14e7de387cab0b9f7dbc7fdbf08d"
+    },
+    {
+      "name": "computer-use",
+      "operation": "move",
+      "original_path": "C:/Users/picom/.agents/skills/computer-use",
+      "current_path": ".skills/library/computer-use",
+      "file_count": 1,
+      "tree_sha256": "1ccf5e4bf0087712cb2ee44a9a63fe790014370cf080ab211a4aec7a892ca73a"
+    },
+    {
+      "name": "content-engine",
+      "operation": "materialize-copy-and-relocate-junction",
+      "original_path": "C:/Users/picom/.agents/skills/content-engine",
+      "current_path": ".skills/library/content-engine",
+      "rollback_junction_path": ".skills/rollback/agents-user-junctions/content-engine",
+      "junction_target": "C:/Users/picom/.claude/plugins/marketplaces/ecc/.agents/skills/content-engine",
+      "file_count": 2,
+      "tree_sha256": "3f87b53579063f7e279668b379ecf3b3578576c2a9a1aba19036b40cffbd5a97"
+    },
+    {
+      "name": "crosspost",
+      "operation": "materialize-copy-and-relocate-junction",
+      "original_path": "C:/Users/picom/.agents/skills/crosspost",
+      "current_path": ".skills/library/crosspost",
+      "rollback_junction_path": ".skills/rollback/agents-user-junctions/crosspost",
+      "junction_target": "C:/Users/picom/.claude/plugins/marketplaces/ecc/.agents/skills/crosspost",
+      "file_count": 2,
+      "tree_sha256": "194be3e1e17f5d87696611c74eb7a13a506392fec8d44902a0a8f5de625be7ba"
+    },
+    {
+      "name": "deep-research",
+      "operation": "materialize-copy-and-relocate-junction",
+      "original_path": "C:/Users/picom/.agents/skills/deep-research",
+      "current_path": ".skills/library/deep-research",
+      "rollback_junction_path": ".skills/rollback/agents-user-junctions/deep-research",
+      "junction_target": "C:/Users/picom/.claude/plugins/marketplaces/ecc/.agents/skills/deep-research",
+      "file_count": 2,
+      "tree_sha256": "0df1915ebb0fd40562ac2898cfddc05439c47c3c5624eabb47ec8b3a57309a70"
+    },
+    {
+      "name": "developing-with-streamlit",
+      "operation": "move",
+      "original_path": "C:/Users/picom/.agents/skills/developing-with-streamlit",
+      "current_path": ".skills/library/developing-with-streamlit",
+      "file_count": 3,
+      "tree_sha256": "7f1222a70dadc901bb913b753e77f8204caeefc444cb93db76211c8661c77b6a"
+    },
+    {
+      "name": "dmux-workflows",
+      "operation": "materialize-copy-and-relocate-junction",
+      "original_path": "C:/Users/picom/.agents/skills/dmux-workflows",
+      "current_path": ".skills/library/dmux-workflows",
+      "rollback_junction_path": ".skills/rollback/agents-user-junctions/dmux-workflows",
+      "junction_target": "C:/Users/picom/.claude/plugins/marketplaces/ecc/.agents/skills/dmux-workflows",
+      "file_count": 2,
+      "tree_sha256": "c965d3ec8506b27631787c95a785ad1f96e9e9cb660abe4b902e3a0011414f3c"
+    },
+    {
+      "name": "documentation-lookup",
+      "operation": "materialize-copy-and-relocate-junction",
+      "original_path": "C:/Users/picom/.agents/skills/documentation-lookup",
+      "current_path": ".skills/library/documentation-lookup",
+      "rollback_junction_path": ".skills/rollback/agents-user-junctions/documentation-lookup",
+      "junction_target": "C:/Users/picom/.claude/plugins/marketplaces/ecc/.agents/skills/documentation-lookup",
+      "file_count": 2,
+      "tree_sha256": "db3fe9e783020342234b28046af6a5ce98ad74c6edae150c53d38f88665ffebe"
+    },
+    {
+      "name": "e2e-testing",
+      "operation": "materialize-copy-and-relocate-junction",
+      "original_path": "C:/Users/picom/.agents/skills/e2e-testing",
+      "current_path": ".skills/library/e2e-testing",
+      "rollback_junction_path": ".skills/rollback/agents-user-junctions/e2e-testing",
+      "junction_target": "C:/Users/picom/.claude/plugins/marketplaces/ecc/.agents/skills/e2e-testing",
+      "file_count": 2,
+      "tree_sha256": "2481688af66ce0cc76cc54ecdf8f88592df8e2f56b1bc77a9982b4eb170c46f3"
+    },
+    {
+      "name": "eval-harness",
+      "operation": "materialize-copy-and-relocate-junction",
+      "original_path": "C:/Users/picom/.agents/skills/eval-harness",
+      "current_path": ".skills/archive/alternate-variants/agents-user/eval-harness",
+      "rollback_junction_path": ".skills/rollback/agents-user-junctions/eval-harness",
+      "junction_target": "C:/Users/picom/.claude/plugins/marketplaces/ecc/.agents/skills/eval-harness",
+      "file_count": 2,
+      "tree_sha256": "b391701421e90626efae725f4a0b08e04422e5ca36166c3a2efd297599903183"
+    },
+    {
+      "name": "everything-claude-code",
+      "operation": "materialize-copy-and-relocate-junction",
+      "original_path": "C:/Users/picom/.agents/skills/everything-claude-code",
+      "current_path": ".skills/library/everything-claude-code",
+      "rollback_junction_path": ".skills/rollback/agents-user-junctions/everything-claude-code",
+      "junction_target": "C:/Users/picom/.claude/plugins/marketplaces/ecc/.agents/skills/everything-claude-code",
+      "file_count": 2,
+      "tree_sha256": "68028944fd14ac1a7e829815cae1449de82a79ca8e970e0633fe632d561e121f"
+    },
+    {
+      "name": "exa-search",
+      "operation": "materialize-copy-and-relocate-junction",
+      "original_path": "C:/Users/picom/.agents/skills/exa-search",
+      "current_path": ".skills/library/exa-search",
+      "rollback_junction_path": ".skills/rollback/agents-user-junctions/exa-search",
+      "junction_target": "C:/Users/picom/.claude/plugins/marketplaces/ecc/.agents/skills/exa-search",
+      "file_count": 2,
+      "tree_sha256": "a8d26e5076b129273dc916c105de667d952358d7997a9e42e90f506bb4a9cf53"
+    },
+    {
+      "name": "fal-ai-media",
+      "operation": "materialize-copy-and-relocate-junction",
+      "original_path": "C:/Users/picom/.agents/skills/fal-ai-media",
+      "current_path": ".skills/library/fal-ai-media",
+      "rollback_junction_path": ".skills/rollback/agents-user-junctions/fal-ai-media",
+      "junction_target": "C:/Users/picom/.claude/plugins/marketplaces/ecc/.agents/skills/fal-ai-media",
+      "file_count": 2,
+      "tree_sha256": "15822b2f1af7620cb970954a421463a228339cfa43fc532881c553fd42882aa3"
+    },
+    {
+      "name": "find-skills",
+      "operation": "move",
+      "original_path": "C:/Users/picom/.agents/skills/find-skills",
+      "current_path": ".skills/library/find-skills",
+      "file_count": 1,
+      "tree_sha256": "797333f1621e3c8a37bf139e625b1f157ed5b0ae23638d7be582170b3dd07c4c"
+    },
+    {
+      "name": "frontend-patterns",
+      "operation": "materialize-copy-and-relocate-junction",
+      "original_path": "C:/Users/picom/.agents/skills/frontend-patterns",
+      "current_path": ".skills/library/frontend-patterns",
+      "rollback_junction_path": ".skills/rollback/agents-user-junctions/frontend-patterns",
+      "junction_target": "C:/Users/picom/.claude/plugins/marketplaces/ecc/.agents/skills/frontend-patterns",
+      "file_count": 2,
+      "tree_sha256": "23a83c358b89463ce6fa7b07f89b64f2839c696e58b86e1458b6bda9bc53d90c"
+    },
+    {
+      "name": "frontend-slides",
+      "operation": "materialize-copy-and-relocate-junction",
+      "original_path": "C:/Users/picom/.agents/skills/frontend-slides",
+      "current_path": ".skills/library/frontend-slides",
+      "rollback_junction_path": ".skills/rollback/agents-user-junctions/frontend-slides",
+      "junction_target": "C:/Users/picom/.claude/plugins/marketplaces/ecc/.agents/skills/frontend-slides",
+      "file_count": 3,
+      "tree_sha256": "fb69b246237427e28997b3ac0c76965cf4bec2a11986caa772056fcfc2f0267e"
+    },
+    {
+      "name": "investor-materials",
+      "operation": "materialize-copy-and-relocate-junction",
+      "original_path": "C:/Users/picom/.agents/skills/investor-materials",
+      "current_path": ".skills/library/investor-materials",
+      "rollback_junction_path": ".skills/rollback/agents-user-junctions/investor-materials",
+      "junction_target": "C:/Users/picom/.claude/plugins/marketplaces/ecc/.agents/skills/investor-materials",
+      "file_count": 2,
+      "tree_sha256": "a928e1f25a3eadc9b87dd6286573121d52195a9c0ffaccd3df0fbc03c7667aeb"
+    },
+    {
+      "name": "investor-outreach",
+      "operation": "materialize-copy-and-relocate-junction",
+      "original_path": "C:/Users/picom/.agents/skills/investor-outreach",
+      "current_path": ".skills/library/investor-outreach",
+      "rollback_junction_path": ".skills/rollback/agents-user-junctions/investor-outreach",
+      "junction_target": "C:/Users/picom/.claude/plugins/marketplaces/ecc/.agents/skills/investor-outreach",
+      "file_count": 2,
+      "tree_sha256": "b0868956b8f81637d2faa4272a11b91401bf481dc05ed961a401b3de39615fd2"
+    },
+    {
+      "name": "market-research",
+      "operation": "materialize-copy-and-relocate-junction",
+      "original_path": "C:/Users/picom/.agents/skills/market-research",
+      "current_path": ".skills/library/market-research",
+      "rollback_junction_path": ".skills/rollback/agents-user-junctions/market-research",
+      "junction_target": "C:/Users/picom/.claude/plugins/marketplaces/ecc/.agents/skills/market-research",
+      "file_count": 2,
+      "tree_sha256": "377f7f978d1ae93d674006bf04dfefdbc534189975d25c5a5419e3b0162a2228"
+    },
+    {
+      "name": "mcp-server-patterns",
+      "operation": "materialize-copy-and-relocate-junction",
+      "original_path": "C:/Users/picom/.agents/skills/mcp-server-patterns",
+      "current_path": ".skills/library/mcp-server-patterns",
+      "rollback_junction_path": ".skills/rollback/agents-user-junctions/mcp-server-patterns",
+      "junction_target": "C:/Users/picom/.claude/plugins/marketplaces/ecc/.agents/skills/mcp-server-patterns",
+      "file_count": 2,
+      "tree_sha256": "23dfcc518cf0c9bdbccc616169d0be3167619aa0fb55b1d0c8e630ec8f0a4a61"
+    },
+    {
+      "name": "mle-workflow",
+      "operation": "materialize-copy-and-relocate-junction",
+      "original_path": "C:/Users/picom/.agents/skills/mle-workflow",
+      "current_path": ".skills/library/mle-workflow",
+      "rollback_junction_path": ".skills/rollback/agents-user-junctions/mle-workflow",
+      "junction_target": "C:/Users/picom/.claude/plugins/marketplaces/ecc/.agents/skills/mle-workflow",
+      "file_count": 2,
+      "tree_sha256": "6a78b7dd59902d988a4b704b97d6ca9363df79b2cdb884167bc6e9570515cab6"
+    },
+    {
+      "name": "nextjs-turbopack",
+      "operation": "materialize-copy-and-relocate-junction",
+      "original_path": "C:/Users/picom/.agents/skills/nextjs-turbopack",
+      "current_path": ".skills/library/nextjs-turbopack",
+      "rollback_junction_path": ".skills/rollback/agents-user-junctions/nextjs-turbopack",
+      "junction_target": "C:/Users/picom/.claude/plugins/marketplaces/ecc/.agents/skills/nextjs-turbopack",
+      "file_count": 2,
+      "tree_sha256": "9e69e122de43156725e151f3f84fb4cd34211cb59b36da6394ef61725a634b09"
+    },
+    {
+      "name": "orca-cli",
+      "operation": "move",
+      "original_path": "C:/Users/picom/.agents/skills/orca-cli",
+      "current_path": ".skills/library/orca-cli",
+      "file_count": 1,
+      "tree_sha256": "78e7a0ab5956ef66b34167bf868b10eab3d9d088daad08172f4afab13911401c"
+    },
+    {
+      "name": "orchestration",
+      "operation": "move",
+      "original_path": "C:/Users/picom/.agents/skills/orchestration",
+      "current_path": ".skills/library/orchestration",
+      "file_count": 1,
+      "tree_sha256": "7826101236948c2448dcf205d3ab2716603103329f5ed92e9cd29347b124578c"
+    },
+    {
+      "name": "plan-canvas",
+      "operation": "materialize-copy-and-relocate-junction",
+      "original_path": "C:/Users/picom/.agents/skills/plan-canvas",
+      "current_path": ".skills/library/plan-canvas",
+      "rollback_junction_path": ".skills/rollback/agents-user-junctions/plan-canvas",
+      "junction_target": "C:/Users/picom/.claude/plugins/marketplaces/ecc/.agents/skills/plan-canvas",
+      "file_count": 2,
+      "tree_sha256": "398bc428f31a777974542fe8e3899e184d872ca2fc54640ae1c88a0b256d94e0"
+    },
+    {
+      "name": "product-capability",
+      "operation": "materialize-copy-and-relocate-junction",
+      "original_path": "C:/Users/picom/.agents/skills/product-capability",
+      "current_path": ".skills/library/product-capability",
+      "rollback_junction_path": ".skills/rollback/agents-user-junctions/product-capability",
+      "junction_target": "C:/Users/picom/.claude/plugins/marketplaces/ecc/.agents/skills/product-capability",
+      "file_count": 2,
+      "tree_sha256": "2e79ee61f37a9cd4b6bf054c04388ea855f47e5e2d1a8544ba87e15ba7a33608"
+    },
+    {
+      "name": "security-review",
+      "operation": "materialize-copy-and-relocate-junction",
+      "original_path": "C:/Users/picom/.agents/skills/security-review",
+      "current_path": ".skills/library/security-review",
+      "rollback_junction_path": ".skills/rollback/agents-user-junctions/security-review",
+      "junction_target": "C:/Users/picom/.claude/plugins/marketplaces/ecc/.agents/skills/security-review",
+      "file_count": 2,
+      "tree_sha256": "feb1362859d1ac62fde871d61cedbd7d2e1e7ab1ee50c38215545de857792bbc"
+    },
+    {
+      "name": "strategic-compact",
+      "operation": "materialize-copy-and-relocate-junction",
+      "original_path": "C:/Users/picom/.agents/skills/strategic-compact",
+      "current_path": ".skills/archive/alternate-variants/agents-user/strategic-compact",
+      "rollback_junction_path": ".skills/rollback/agents-user-junctions/strategic-compact",
+      "junction_target": "C:/Users/picom/.claude/plugins/marketplaces/ecc/.agents/skills/strategic-compact",
+      "file_count": 2,
+      "tree_sha256": "91046faa414a3f027f639fb3c0690cf0115a8f0c5ec17b4dac8b5f27444b04f1"
+    },
+    {
+      "name": "tdd-workflow",
+      "operation": "materialize-copy-and-relocate-junction",
+      "original_path": "C:/Users/picom/.agents/skills/tdd-workflow",
+      "current_path": ".skills/archive/alternate-variants/agents-user/tdd-workflow",
+      "rollback_junction_path": ".skills/rollback/agents-user-junctions/tdd-workflow",
+      "junction_target": "C:/Users/picom/.claude/plugins/marketplaces/ecc/.agents/skills/tdd-workflow",
+      "file_count": 2,
+      "tree_sha256": "e43f627da4f6cf98d79b20dc3fe75109aee338945ecbf621ef934d88fbab5b02"
+    },
+    {
+      "name": "unified-memory",
+      "operation": "materialize-copy-and-relocate-junction",
+      "original_path": "C:/Users/picom/.agents/skills/unified-memory",
+      "current_path": ".skills/library/unified-memory",
+      "rollback_junction_path": ".skills/rollback/agents-user-junctions/unified-memory",
+      "junction_target": "C:/Users/picom/.claude/plugins/marketplaces/ecc/.agents/skills/unified-memory",
+      "file_count": 2,
+      "tree_sha256": "6d886ceaa118d29a137dd085058ab707cb53add1004caab3244b907ec8187fdb"
+    },
+    {
+      "name": "verification-loop",
+      "operation": "materialize-copy-and-relocate-junction",
+      "original_path": "C:/Users/picom/.agents/skills/verification-loop",
+      "current_path": ".skills/archive/alternate-variants/agents-user/verification-loop",
+      "rollback_junction_path": ".skills/rollback/agents-user-junctions/verification-loop",
+      "junction_target": "C:/Users/picom/.claude/plugins/marketplaces/ecc/.agents/skills/verification-loop",
+      "file_count": 2,
+      "tree_sha256": "5c8f98d86542a9649743fbd71e28d53e93b69fb8c8bda6f93900a6bb35a97963"
+    },
+    {
+      "name": "video-editing",
+      "operation": "materialize-copy-and-relocate-junction",
+      "original_path": "C:/Users/picom/.agents/skills/video-editing",
+      "current_path": ".skills/library/video-editing",
+      "rollback_junction_path": ".skills/rollback/agents-user-junctions/video-editing",
+      "junction_target": "C:/Users/picom/.claude/plugins/marketplaces/ecc/.agents/skills/video-editing",
+      "file_count": 2,
+      "tree_sha256": "7318347a83c47ce0c783e842ae4502151454e963534cccc7efb2c710b29e373f"
+    },
+    {
+      "name": "x-api",
+      "operation": "materialize-copy-and-relocate-junction",
+      "original_path": "C:/Users/picom/.agents/skills/x-api",
+      "current_path": ".skills/library/x-api",
+      "rollback_junction_path": ".skills/rollback/agents-user-junctions/x-api",
+      "junction_target": "C:/Users/picom/.claude/plugins/marketplaces/ecc/.agents/skills/x-api",
+      "file_count": 2,
+      "tree_sha256": "574e9eb529d89c660d15076f38f87f4d308fd32f95d483a8a8cfb95aeda53d8b"
+    }
+  ],
+  "canonicalization": {
+    "canonical_count": 88,
+    "alternate_count": 10,
+    "codex_user_canonical": [
+      "eval-harness",
+      "strategic-compact",
+      "tdd-workflow",
+      "verification-loop"
+    ],
+    "agents_user_canonical": [
+      "agent-introspection-debugging",
+      "agent-sort",
+      "e2e-testing",
+      "plan-canvas",
+      "unified-memory"
+    ],
+    "daily_canonical": [
+      "graphify"
+    ],
+    "empty_source_buckets": ".skills/rollback/empty-source-buckets"
+  },
+  "context_budget_change": {
+    "run_id": "skill-context-budget-20260901",
+    "approved_kernel": [
+      "budgeted-graph-orchestration",
+      "comment-checker",
+      "graphify",
+      "lsp",
+      "rules",
+      "skill-library",
+      "start-work",
+      "teammode",
+      "ultrawork",
+      "ulw-loop"
+    ],
+    "rehomed_from_daily": [
+      {
+        "name": "ast-grep",
+        "from_path": ".agents/skills/ast-grep",
+        "to_path": ".skills/library/ast-grep"
+      },
+      {
+        "name": "coding-agent-sessions",
+        "from_path": ".agents/skills/coding-agent-sessions",
+        "to_path": ".skills/library/coding-agent-sessions"
+      },
+      {
+        "name": "data-scientist",
+        "from_path": ".agents/skills/data-scientist",
+        "to_path": ".skills/library/data-scientist"
+      },
+      {
+        "name": "debugging",
+        "from_path": ".agents/skills/debugging",
+        "to_path": ".skills/library/debugging"
+      },
+      {
+        "name": "frontend",
+        "from_path": ".agents/skills/frontend",
+        "to_path": ".skills/library/frontend"
+      },
+      {
+        "name": "git-master",
+        "from_path": ".agents/skills/git-master",
+        "to_path": ".skills/library/git-master"
+      },
+      {
+        "name": "init-deep",
+        "from_path": ".agents/skills/init-deep",
+        "to_path": ".skills/library/init-deep"
+      },
+      {
+        "name": "lcx-contribute-bug-fix",
+        "from_path": ".agents/skills/lcx-contribute-bug-fix",
+        "to_path": ".skills/library/lcx-contribute-bug-fix"
+      },
+      {
+        "name": "lcx-doctor",
+        "from_path": ".agents/skills/lcx-doctor",
+        "to_path": ".skills/library/lcx-doctor"
+      },
+      {
+        "name": "lcx-report-bug",
+        "from_path": ".agents/skills/lcx-report-bug",
+        "to_path": ".skills/library/lcx-report-bug"
+      },
+      {
+        "name": "lsp-setup",
+        "from_path": ".agents/skills/lsp-setup",
+        "to_path": ".skills/library/lsp-setup"
+      },
+      {
+        "name": "programming",
+        "from_path": ".agents/skills/programming",
+        "to_path": ".skills/library/programming"
+      },
+      {
+        "name": "refactor",
+        "from_path": ".agents/skills/refactor",
+        "to_path": ".skills/library/refactor"
+      },
+      {
+        "name": "remove-ai-slops",
+        "from_path": ".agents/skills/remove-ai-slops",
+        "to_path": ".skills/library/remove-ai-slops"
+      },
+      {
+        "name": "review-work",
+        "from_path": ".agents/skills/review-work",
+        "to_path": ".skills/library/review-work"
+      },
+      {
+        "name": "ultimate-browsing",
+        "from_path": ".agents/skills/ultimate-browsing",
+        "to_path": ".skills/library/ultimate-browsing"
+      },
+      {
+        "name": "ulw-plan",
+        "from_path": ".agents/skills/ulw-plan",
+        "to_path": ".skills/library/ulw-plan"
+      },
+      {
+        "name": "ulw-research",
+        "from_path": ".agents/skills/ulw-research",
+        "to_path": ".skills/library/ulw-research"
+      },
+      {
+        "name": "visual-qa",
+        "from_path": ".agents/skills/visual-qa",
+        "to_path": ".skills/library/visual-qa"
+      }
+    ],
+    "promoted": {
+      "name": "budgeted-graph-orchestration",
+      "source_path": "C:/Users/picom/plugins/budgeted-graph-orchestrator/skills/budgeted-graph-orchestration",
+      "current_path": ".agents/skills/budgeted-graph-orchestration",
+      "skill_sha256": "07f43c6711c100315a748f4eb88411df5276247623b731bed5fbc7232e027658"
+    },
+    "plugin_catalog": {
+      "path": ".skills/plugin-catalog.json",
+      "entry_count": 20,
+      "sha256": "024ae46a5c72123796ffbfb8912c9ba37a2b3209c099578ad01c23c7d3d4dd0e"
+    },
+    "config_backups": [
+      {
+        "path": ".skills/rollback/skill-context-budget-20260901/global-config.toml",
+        "sha256": "7e2a6df78d50fc857acd776831346fdc5c15a1484b9731d9a7aa0861138cc9b7"
+      },
+      {
+        "path": ".skills/rollback/skill-context-budget-20260901/runtime-config.toml",
+        "sha256": "ebcfe1b336319754348ef24b6bed86e67193f5f1907c32c4e9b4ad203a2a655b"
+      },
+      {
+        "path": ".skills/rollback/skill-context-budget-20260901/catalog.json",
+        "sha256": "5b8fecbe583d89723f70b0f822d6cb4b7d31835ff51e049209dc745c988b40f1"
+      },
+      {
+        "path": ".skills/rollback/skill-context-budget-20260901/README.md",
+        "sha256": "0538379a346e2f4d639e2338cca2650ed1b942b78dea853e4254202e651198e8"
+      },
+      {
+        "path": ".skills/rollback/skill-context-budget-20260901/AGENTS.md",
+        "sha256": "197b028eb2e9426b4fb1500ce0636adb301fa0da314f8426aa32f4036e2199aa"
+      },
+      {
+        "path": ".skills/rollback/skill-context-budget-20260901/skill-library-SKILL.md",
+        "sha256": "4a3a5d3880024b4cff0a17c2195a714099296f8dd877a08d1a49c52f3ce2b8dc"
+      }
+    ],
+    "runtime_metadata_note": "Five .codex-remote-plugin-install.json markers were generated by the Codex runtime during session startup; they were not edited or removed.",
+    "restore_order": [
+      "Restore both backed-up config.toml files and restart Codex",
+      "Move the 19 rehomed directories back only after checking destination collisions",
+      "Remove the promoted DAILY copy only if its source still exists and no task depends on it",
+      "Restore catalog, README, AGENTS.md, and skill-library SKILL.md backups"
+    ]
+  }
+}

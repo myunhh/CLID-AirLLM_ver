@@ -1,0 +1,11 @@
+{
+  "version": "fast-v1",
+  "fast": true,
+  "reasoning": "low",
+  "model": null,
+  "constraints": {
+    "modelCallLimit": null,
+    "allowPlanning": false,
+    "allowDelegation": false
+  }
+}

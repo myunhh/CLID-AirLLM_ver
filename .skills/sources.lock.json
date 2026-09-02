@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "generated_on": "2026-09-01",
+  "collections": [
+    {
+      "id": "lazycodex-skills",
+      "repository": "https://github.com/code-yeongyu/lazycodex",
+      "commit": "10f95587d3aeacf208cc1fee88a91315962d31e8",
+      "source_path": "plugins/omo/skills",
+      "installed_roots": [
+        "../.agents/skills",
+        "library"
+      ],
+      "installed_layout": "7 foundational LazyCodex skills in DAILY and 19 canonical LazyCodex skills in the dynamic library",
+      "selection": "all immediate child directories containing SKILL.md",
+      "skill_count": 26,
+      "excluded": [
+        "plugins/omo/.codex-plugin",
+        "plugins/omo/.mcp.json",
+        "plugins/omo/hooks",
+        "plugins/omo/scripts",
+        "plugins/omo/components"
+      ]
+    },
+    {
+      "id": "graphify-codex-skill",
+      "repository": "https://github.com/Graphify-Labs/graphify",
+      "default_branch": "v8",
+      "commit": "33362d969292b57eda82f3fbd9eb5f3f5bc9bbc2",
+      "source_skill": "graphify/skill-codex.md",
+      "source_references": "graphify/skills/codex/references",
+      "installed_path": "../.agents/skills/graphify",
+      "skill_blob_sha": "af3f723c7878b8ca9252af511270511002086ed4",
+      "reference_count": 8
+    }
+  ]
+}

@@ -1,28 +1,29 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
+myenv/
+myenv-311/
+/snu-ai-challenge/data/
+/myunhh.pem
+
+# Local repositories and scratch space
+/prime-agent/
+/tmp/
+
+# Runtime state and evidence (the harness recreates these locally)
+/.omo/*
+!/.omo/evidence/
+/.omo/evidence/*
+!/.omo/evidence/.gitkeep
+/.orchestrator/definitions/*
+!/.orchestrator/definitions/.gitkeep
+/.orchestrator/tasks/*
+!/.orchestrator/tasks/.gitkeep
+/.orchestrator/runs/*
+!/.orchestrator/runs/.gitkeep
+/.orchestrator/kernel-bridge/.venv/
+
+# Machine-specific recovery state and generated caches
+/.skills/rollback/agents-user-junctions/
+/.skills/rollback/generated-system-cache/
+/.codex/*.graphify-bak
+**/__pycache__/
 *.py[cod]
-*$py.class
-
-# Virtual environments
-.venv/
-venv/
-ENV/
-env/
-myenv*/
-
-# IDE and Editor Files
-.vscode/
-.idea/
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-.DS_Store
-
-# CLID Local logs & Temporary files
-orchestrator_TP_logs.json
-*.log
-
-# Google Agent Development Kit (ADK) local artifacts
-.agents/
+node_modules/

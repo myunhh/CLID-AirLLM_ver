@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "judge-receipt.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["runId", "nodeId", "acceptanceDigest", "resultDigest", "judgeId", "nonce"],
+  "properties": {
+    "runId": {"type": "string", "minLength": 1},
+    "nodeId": {"type": "string", "minLength": 1},
+    "acceptanceDigest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "resultDigest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "judgeId": {"type": "string", "minLength": 1},
+    "nonce": {"type": "string", "minLength": 1},
+    "outcome": {"enum": ["pass", "fail"]}
+  }
+}

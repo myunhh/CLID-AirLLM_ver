@@ -1,0 +1,619 @@
+#:schema https://developers.openai.com/codex/config-schema.json
+
+# Everything Claude Code (ECC) — Codex Reference Configuration
+#
+# Copy this file to ~/.codex/config.toml for global defaults, or keep it in
+# the project root as .codex/config.toml for project-local settings.
+#
+# Official docs:
+# - https://developers.openai.com/codex/config-reference
+# - https://developers.openai.com/codex/multi-agent
+
+# Model selection
+# Leave `model` and `model_provider` unset so Codex CLI uses its current
+# built-in defaults. Uncomment and pin them only if you intentionally want
+# repo-local or global model overrides.
+
+# Top-level runtime settings (current Codex schema)
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+web_search = "live"
+
+# External notifications receive a JSON payload on stdin.
+
+# Persistent instructions are appended to every prompt (additive, unlike
+# model_instructions_file which replaces AGENTS.md).
+persistent_instructions = "Follow project AGENTS.md guidelines. Use available MCP servers when they can help."
+
+# Skill-budget policy (2026-08-21)
+# Keep skill files installed for reversible recovery, but hide broad/unused
+# engineering bundles from the model-visible catalog. Re-enable one by changing
+# its entry to `enabled = true` and restart Codex.
+
+# ECC plugin entries duplicated by the standalone Codex skill set. Keep only the
+# research/writing skills used by the AI-Study vault.
+model = "gpt-5.6-sol"
+model_reasoning_effort = "high"
+
+[[skills.config]]
+name = "ecc:agent-introspection-debugging"
+enabled = false
+
+[[skills.config]]
+name = "ecc:agent-sort"
+enabled = false
+
+[[skills.config]]
+name = "ecc:api-design"
+enabled = false
+
+[[skills.config]]
+name = "ecc:backend-patterns"
+enabled = false
+
+[[skills.config]]
+name = "ecc:benchmark-methodology"
+enabled = false
+
+[[skills.config]]
+name = "ecc:brand-discovery"
+enabled = true
+
+[[skills.config]]
+name = "ecc:bun-runtime"
+enabled = false
+
+[[skills.config]]
+name = "ecc:coding-standards"
+enabled = false
+
+[[skills.config]]
+name = "ecc:competitive-platform-analysis"
+enabled = false
+
+[[skills.config]]
+name = "ecc:competitive-report-structure"
+enabled = false
+
+[[skills.config]]
+name = "ecc:crosspost"
+enabled = true
+
+[[skills.config]]
+name = "ecc:dmux-workflows"
+enabled = false
+
+[[skills.config]]
+name = "ecc:documentation-lookup"
+enabled = false
+
+[[skills.config]]
+name = "ecc:e2e-testing"
+enabled = false
+
+[[skills.config]]
+name = "ecc:eval-harness"
+enabled = false
+
+[[skills.config]]
+name = "ecc:everything-claude-code"
+enabled = false
+
+[[skills.config]]
+name = "ecc:fal-ai-media"
+enabled = true
+
+[[skills.config]]
+name = "ecc:frontend-patterns"
+enabled = false
+
+[[skills.config]]
+name = "ecc:frontend-slides"
+enabled = true
+
+[[skills.config]]
+name = "ecc:investor-outreach"
+enabled = true
+
+[[skills.config]]
+name = "ecc:mcp-server-patterns"
+enabled = false
+
+[[skills.config]]
+name = "ecc:mle-workflow"
+enabled = false
+
+[[skills.config]]
+name = "ecc:nextjs-turbopack"
+enabled = false
+
+[[skills.config]]
+name = "ecc:plan-canvas"
+enabled = true
+
+[[skills.config]]
+name = "ecc:product-capability"
+enabled = true
+
+[[skills.config]]
+name = "ecc:security-review"
+enabled = false
+
+[[skills.config]]
+name = "ecc:strategic-compact"
+enabled = false
+
+[[skills.config]]
+name = "ecc:tdd-workflow"
+enabled = false
+
+[[skills.config]]
+name = "ecc:unified-memory"
+enabled = false
+
+[[skills.config]]
+name = "ecc:verification-loop"
+enabled = false
+
+[[skills.config]]
+name = "ecc:video-editing"
+enabled = true
+
+[[skills.config]]
+name = "ecc:x-api"
+enabled = true
+
+# Research stays on the server profile; keep the local profile writing/generation-focused.
+
+[[skills.config]]
+name = "ecc:deep-research"
+enabled = false
+
+[[skills.config]]
+name = "ecc:exa-search"
+enabled = false
+
+[[skills.config]]
+name = "ecc:market-research"
+enabled = false
+
+# Unused engineering/database/agent-management skills for this notes vault.
+
+[[skills.config]]
+name = "ai-regression-testing"
+enabled = false
+
+[[skills.config]]
+name = "architecture-decision-records"
+enabled = false
+
+[[skills.config]]
+name = "browser-qa"
+enabled = false
+
+[[skills.config]]
+name = "ck"
+enabled = false
+
+[[skills.config]]
+name = "click-path-audit"
+enabled = false
+
+[[skills.config]]
+name = "clickhouse-io"
+enabled = false
+
+[[skills.config]]
+name = "code-tour"
+enabled = false
+
+[[skills.config]]
+name = "codebase-onboarding"
+enabled = false
+
+[[skills.config]]
+name = "codehealth-mcp"
+enabled = false
+
+[[skills.config]]
+name = "continuous-learning"
+enabled = false
+
+[[skills.config]]
+name = "continuous-learning-v2"
+enabled = false
+
+[[skills.config]]
+name = "council"
+enabled = false
+
+[[skills.config]]
+name = "database-migrations"
+enabled = false
+
+[[skills.config]]
+name = "delivery-gate"
+enabled = false
+
+[[skills.config]]
+name = "e2e-testing"
+enabled = false
+
+[[skills.config]]
+name = "ecc-recipes"
+enabled = false
+
+[[skills.config]]
+name = "error-handling"
+enabled = false
+
+[[skills.config]]
+name = "eval-harness"
+enabled = false
+
+[[skills.config]]
+name = "hookify-rules"
+enabled = false
+
+[[skills.config]]
+name = "inherit-legacy-style"
+enabled = false
+
+[[skills.config]]
+name = "jpa-patterns"
+enabled = false
+
+[[skills.config]]
+name = "mysql-patterns"
+enabled = false
+
+[[skills.config]]
+name = "plan-canvas"
+enabled = false
+
+[[skills.config]]
+name = "plankton-code-quality"
+enabled = false
+
+[[skills.config]]
+name = "postgres-patterns"
+enabled = false
+
+[[skills.config]]
+name = "prisma-patterns"
+enabled = false
+
+[[skills.config]]
+name = "production-audit"
+enabled = false
+
+[[skills.config]]
+name = "redis-patterns"
+enabled = false
+
+[[skills.config]]
+name = "repo-scan"
+enabled = false
+
+[[skills.config]]
+name = "rules-distill"
+enabled = false
+
+[[skills.config]]
+name = "santa-method"
+enabled = false
+
+[[skills.config]]
+name = "tdd-workflow"
+enabled = false
+
+[[skills.config]]
+name = "windows-desktop-e2e"
+enabled = false
+
+# Artifact plugins not needed for the current Markdown/PDF-oriented workflow.
+
+[[skills.config]]
+name = "presentations"
+enabled = false
+
+[[skills.config]]
+name = "spreadsheets"
+enabled = false
+
+[[skills.config]]
+name = "spreadsheets:excel-live-control"
+enabled = false
+
+[[skills.config]]
+name = "template-creator:template-creator"
+enabled = false
+
+# model_instructions_file replaces built-in instructions instead of AGENTS.md,
+# so leave it unset unless you intentionally want a single override file.
+# model_instructions_file = "/absolute/path/to/instructions.md"
+
+model = "gpt-5.6-luna"
+model_reasoning_effort = "xhigh"
+
+# MCP servers
+# Keep the default project set lean. API-backed servers inherit credentials from
+# the launching environment or can be supplied by a user-level ~/.codex/config.toml.
+notify = [ "C:\\Users\\picom\\AppData\\Local\\OpenAI\\Codex\\runtimes\\cua_node\\2fb562745e6d66f0\\bin\\node_modules\\@oai\\sky\\bin\\windows\\codex-computer-use.exe", "turn-ended", "--previous-notify", "[\"terminal-notifier\",\"-title\",\"Codex ECC\",\"-message\",\"Task completed!\",\"-sound\",\"default\"]" ]
+
+[mcp_servers.github]
+command = "npx"
+args = ["-y", "@modelcontextprotocol/server-github"]
+startup_timeout_sec = 30
+
+[mcp_servers.context7]
+command = "npx"
+# Canonical Codex section name is `context7`; the package itself remains
+# `@upstash/context7-mcp`.
+args = ["-y", "@upstash/context7-mcp@latest"]
+startup_timeout_sec = 30
+
+[mcp_servers.exa]
+command = "npx"
+args = ["-y", "mcp-remote", "https://mcp.exa.ai/mcp"]
+startup_timeout_sec = 30
+
+[mcp_servers.memory]
+command = "npx"
+args = ["-y", "@modelcontextprotocol/server-memory"]
+startup_timeout_sec = 30
+
+[mcp_servers.playwright]
+command = "npx"
+args = ["-y", "@playwright/mcp@latest", "--extension"]
+startup_timeout_sec = 30
+
+[mcp_servers.sequential-thinking]
+command = "npx"
+args = ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+startup_timeout_sec = 30
+
+[mcp_servers.node_repl]
+args = []
+command = 'C:\Users\picom\AppData\Local\OpenAI\Codex\runtimes\cua_node\2fb562745e6d66f0\bin\node_repl.exe'
+startup_timeout_sec = 120
+
+[mcp_servers.node_repl.env]
+NODE_REPL_NATIVE_PIPE_CONNECT_TIMEOUT_MS = "1000"
+NODE_REPL_NODE_MODULE_DIRS = 'C:\Users\picom\AppData\Local\OpenAI\Codex\runtimes\cua_node\2fb562745e6d66f0\bin\node_modules'
+NODE_REPL_NODE_PATH = 'C:\Users\picom\AppData\Local\OpenAI\Codex\runtimes\cua_node\2fb562745e6d66f0\bin\node.exe'
+NODE_REPL_TRUSTED_CODE_PATHS = 'C:\Users\picom\.codex;C:\Users\picom\AppData\Local\OpenAI\Codex\runtimes\cua_node\2fb562745e6d66f0\bin\node_modules'
+CODEX_HOME = 'C:\Users\picom\.codex'
+BROWSER_USE_AVAILABLE_BACKENDS = "chrome,iab"
+NODE_REPL_INSTRUCTIONS_USE_CASE_BROWSER = "Control the in-app browser in conjunction with the Browser Plugin."
+NODE_REPL_INSTRUCTIONS_USE_CASE_CHROME = "Control the Chrome browser in conjunction with the Chrome Plugin. Prefer this method of controlling Chrome over alternatives (such as Computer Use) unless the user explicitly mentions an alternative."
+BROWSER_USE_CODEX_APP_BUILD_FLAVOR = "prod"
+BROWSER_USE_CODEX_APP_VERSION = "26.814.41407"
+NODE_REPL_TRUSTED_SERVICES = '{"browser":"C:/Users/picom/.codex/plugins/cache/openai-bundled/browser/26.814.41407/scripts/browser-service.mjs","sky":"@oai/sky/service"}'
+SKY_CUA_NATIVE_PIPE = "1"
+SKY_CUA_NATIVE_PIPE_DIRECTORY = '\\.\pipe\codex-computer-use-6c548f0b-653b-425f-bb9f-24ab92461840'
+CODEX_CLI_PATH = 'C:\Users\picom\AppData\Local\OpenAI\Codex\bin\39633208fb6e0c47\codex.exe'
+
+# Additional MCP servers (uncomment as needed):
+# [mcp_servers.supabase]
+# command = "npx"
+# args = ["-y", "supabase-mcp-server@latest", "--read-only"]
+#
+# [mcp_servers.firecrawl]
+# command = "npx"
+# args = ["-y", "firecrawl-mcp"]
+#
+# [mcp_servers.fal-ai]
+# command = "npx"
+# args = ["-y", "fal-ai-mcp-server"]
+#
+# [mcp_servers.cloudflare]
+# command = "npx"
+# args = ["-y", "@cloudflare/mcp-server-cloudflare"]
+
+[features]
+# Multi-agent collaboration is enabled through `[agents].enabled` below.
+js_repl = false
+
+# Profiles — switch with `codex -p <name>`
+
+[profiles.strict]
+approval_policy = "on-request"
+sandbox_mode = "read-only"
+web_search = "cached"
+
+[profiles.yolo]
+approval_policy = "never"
+sandbox_mode = "workspace-write"
+web_search = "live"
+
+[agents]
+# Multi-agent role limits and local role definitions.
+# These map to `.codex/agents/*.toml` and mirror the repo's explorer/reviewer/docs workflow.
+enabled = true
+max_concurrent_threads_per_session = 6
+max_depth = 1
+
+[agents.reviewer]
+description = "PR reviewer focused on correctness, security, and missing tests."
+config_file = 'C:\Users\picom\.codex\agents\reviewer.toml'
+
+[agents.docs_researcher]
+description = "Documentation specialist that verifies APIs, framework behavior, and release notes."
+config_file = 'C:\Users\picom\.codex\agents\docs-researcher.toml'
+
+[agents.budget_explorer]
+description = "Read-only graph-first explorer operating from a bounded task capsule."
+config_file = 'C:\Users\picom\.codex\agents\budget-explorer.toml'
+
+[agents.budget_worker]
+description = "Implementation worker restricted to capsule ownership, budget, and acceptance boundaries."
+config_file = 'C:\Users\picom\.codex\agents\budget-worker.toml'
+
+[agents.budget_integrator]
+description = "Central integrator for orchestrator-approved worker results; never pushes or merges."
+config_file = 'C:\Users\picom\.codex\agents\budget-integrator.toml'
+
+[agents.budget_judge]
+description = "Independent read-only judge for deterministic acceptance and boundary verification."
+config_file = 'C:\Users\picom\.codex\agents\budget-judge.toml'
+
+[windows]
+sandbox = "elevated"
+
+[desktop]
+followUpQueueMode = "queue"
+conversationDetailMode = "STEPS_PROSE"
+
+[marketplaces.openai-bundled]
+last_updated = "2026-08-20T03:31:13Z"
+source_type = "local"
+source = '\\?\C:\Users\picom\.codex\.tmp\bundled-marketplaces\openai-bundled'
+
+[marketplaces.openai-primary-runtime]
+last_updated = "2026-08-27T08:37:06Z"
+source_type = "local"
+source = '\\?\C:\Users\picom\.cache\codex-runtimes\codex-primary-runtime\plugins\openai-primary-runtime'
+
+[plugins."documents@openai-primary-runtime"]
+enabled = true
+
+[plugins."pdf@openai-primary-runtime"]
+enabled = true
+
+[plugins."spreadsheets@openai-primary-runtime"]
+enabled = false
+
+[plugins."presentations@openai-primary-runtime"]
+enabled = true
+
+[plugins."template-creator@openai-primary-runtime"]
+enabled = true
+
+[projects.'c:\users\picom\documents\codex\2026-08-20\d']
+trust_level = "trusted"
+
+[projects.'c:\users\picom\documents\codex\2026-08-20\s']
+trust_level = "trusted"
+
+[projects.'c:\users\picom\iclouddrive\ai-study']
+trust_level = "trusted"
+
+[projects.'c:\windows\system32']
+trust_level = "trusted"
+
+[projects."C:\\vsc\\AI-Study"]
+trust_level = "trusted"
+
+[projects."C:\\vsc"]
+trust_level = "trusted"
+
+[projects.'c:\users\picom\orca\paperbridge']
+trust_level = "trusted"
+
+[projects.'c:\users\picom\orca\paperbridge-frontend']
+trust_level = "trusted"
+
+[projects.'c:\users\picom\orca\paperbridge-backend']
+trust_level = "trusted"
+
+[projects.'c:\users\picom\orca\workspaces\paperbridge-frontend']
+trust_level = "trusted"
+
+[hooks.state]
+
+[hooks.state."omo@sisyphuslabs:hooks/session-start-loading-project-rules.json:session_start:0:0"]
+trusted_hash = "sha256:96c3272e456ccab2bb1213dbdbea460bad9bbc48bfbdc9d967ad62094503ccbc"
+
+[hooks.state."omo@sisyphuslabs:hooks/session-start-recording-session-telemetry.json:session_start:0:0"]
+trusted_hash = "sha256:7ad0521fbb3520db750bc40102b3a8d1301c79e9dfd8bd4a720a85814c306c15"
+
+[hooks.state."omo@sisyphuslabs:hooks/session-start-checking-auto-update.json:session_start:0:0"]
+trusted_hash = "sha256:30b3def1c1be4818c77d186c57194be6c28714ea767c9888429cc2e22fb0a48f"
+
+[hooks.state."omo@sisyphuslabs:hooks/session-start-checking-bootstrap-provisioning.json:session_start:0:0"]
+trusted_hash = "sha256:ee94c7763398e43e61594f6b8cf470c81fe004cc0c322de7f5a5f355af3deaf5"
+
+[hooks.state."omo@sisyphuslabs:hooks/session-start-checking-codegraph-bootstrap.json:session_start:0:0"]
+trusted_hash = "sha256:37477453bfb9361f94bbc39b7b69b30fa7c38e1e36a0a7b07d66de5e2cd3ca00"
+
+[hooks.state."omo@sisyphuslabs:hooks/user-prompt-submit-loading-project-rules.json:user_prompt_submit:0:0"]
+trusted_hash = "sha256:27655bf51d83b01912ed4ad0f6d6a859f9f7b2999c7d5fed1addda71a9816912"
+
+[hooks.state."omo@sisyphuslabs:hooks/user-prompt-submit-checking-ultrawork-trigger.json:user_prompt_submit:0:0"]
+trusted_hash = "sha256:b9a848ce8e3467e491f21cddc36394d89eaf4ebb27d89a780044b9987a94e370"
+
+[hooks.state."omo@sisyphuslabs:hooks/user-prompt-submit-checking-ulw-loop-steering.json:user_prompt_submit:0:0"]
+trusted_hash = "sha256:a647e7e8444fbca1231c8f7b827c42278e35f0b2e64cafe9a719de5326f7bb5d"
+
+[hooks.state."omo@sisyphuslabs:hooks/pre-tool-use-recommending-git-bash-mcp.json:pre_tool_use:0:0"]
+trusted_hash = "sha256:bbde0afc3bf46321685851742fee0d5fb0ed18fff72686157d522a8af14b56b4"
+
+[hooks.state."omo@sisyphuslabs:hooks/pre-tool-use-enforcing-unlimited-goal-budget.json:pre_tool_use:0:0"]
+trusted_hash = "sha256:0875407bb827a72b477d979fcc80716b8fccc6d4378bbc050b5ec4eaddff0e91"
+
+[hooks.state."omo@sisyphuslabs:hooks/pre-tool-use-guarding-ulw-loop-spawns.json:pre_tool_use:0:0"]
+trusted_hash = "sha256:e5916bc2672df8d42f87cf1ea03d98ae68307932c0671a2491b8e066ef04b80f"
+
+[hooks.state."omo@sisyphuslabs:hooks/post-tool-use-checking-comments.json:post_tool_use:0:0"]
+trusted_hash = "sha256:97bc99ca564f8b08d2b6a498cf3cb4e52b4bd22d5e8e782038a90a6fdbddc890"
+
+[hooks.state."omo@sisyphuslabs:hooks/post-tool-use-checking-lsp-diagnostics.json:post_tool_use:0:0"]
+trusted_hash = "sha256:64e809bc8802513e5ada2eb8999f6090e0123cfb1e2bbcb09b76e6a5928456bb"
+
+[hooks.state."omo@sisyphuslabs:hooks/post-tool-use-checking-codegraph-init-guidance.json:post_tool_use:0:0"]
+trusted_hash = "sha256:97fd1b246228e30158a2694215e8a2d6862c4a66393749ebd64befe3dd3e3a66"
+
+[hooks.state."omo@sisyphuslabs:hooks/post-tool-use-matching-project-rules.json:post_tool_use:0:0"]
+trusted_hash = "sha256:edce8788fcfc9162e579ae1b0b9220c1adcfd774d5e946a283045f27014f7104"
+
+[hooks.state."omo@sisyphuslabs:hooks/post-tool-use-checking-thread-title-hygiene.json:post_tool_use:0:0"]
+trusted_hash = "sha256:3966b7f9a6264811a2858ec0831dc14568f4584995351357c6d6d1977fa6f676"
+
+[hooks.state."omo@sisyphuslabs:hooks/post-compact-resetting-git-bash-mcp-reminder.json:post_compact:0:0"]
+trusted_hash = "sha256:42efb3352dbb341f24cee3f5de8f8bf98c3745f77c1f48d5d980998c8da1f076"
+
+[hooks.state."omo@sisyphuslabs:hooks/post-compact-resetting-project-rule-cache.json:post_compact:0:0"]
+trusted_hash = "sha256:809a4eb1d36334d30f594b7bd72bc1b524ceaa95edb8955186b4e0eaf8e92257"
+
+[hooks.state."omo@sisyphuslabs:hooks/post-compact-resetting-lsp-diagnostics-cache.json:post_compact:0:0"]
+trusted_hash = "sha256:bd9ca8f837666b3eda627e8442b594c59837f25812149dc24ceb0f8f457b56ee"
+
+[hooks.state."omo@sisyphuslabs:hooks/stop-checking-start-work-continuation.json:stop:0:0"]
+trusted_hash = "sha256:92820adc24d3609967279184a258951fde0625c5a599cb0f1f635ba2a77f394f"
+
+[hooks.state."omo@sisyphuslabs:hooks/stop-checking-ulw-loop-resume.json:stop:0:0"]
+trusted_hash = "sha256:51cf04def86cccd02bc19450f9ab64d03eabef83ac1cc68a2d30ba4db24886e1"
+
+[hooks.state."omo@sisyphuslabs:hooks/subagent-stop-checking-start-work-continuation.json:subagent_stop:0:0"]
+trusted_hash = "sha256:63b9842ad01479850a0ba66fc0f5ab154dc19afca9a8e3ff18d7587e693f8ebc"
+
+[hooks.state."omo@sisyphuslabs:hooks/subagent-stop-verifying-lazycodex-executor-evidence.json:subagent_stop:0:0"]
+trusted_hash = "sha256:c4629c46367a82cd00ad1ec8a2b375e3ee3e2e34aa5bb3e9fc19af311eeab25e"
+
+[hooks.state.'C:\vsc\.codex\hooks.json:pre_tool_use:0:0']
+trusted_hash = "sha256:4a1521dda5ee3a7d0bffa94d53b826efe5d03568a1c34ddb18189d230d459bea"
+
+[hooks.state.'C:\Users\picom\AppData\Roaming\orca\codex-runtime-home\home\hooks.json:pre_tool_use:0:0']
+trusted_hash = "sha256:dd85093c73f4c8a604a18a6ca7034b3faf88021f753d584ccf13263de0d15855"
+
+[hooks.state.'C:\Users\picom\AppData\Roaming\orca\codex-runtime-home\home\hooks.json:permission_request:0:0']
+trusted_hash = "sha256:f71239338bce5c124dd50f4383e6795feae488eff6c2e4f5bec5f1c5af58a3be"
+
+[hooks.state.'C:\Users\picom\AppData\Roaming\orca\codex-runtime-home\home\hooks.json:post_tool_use:0:0']
+trusted_hash = "sha256:e8bf2deb3150041214a924fee892de150dfbe56ad6ec60f2f28736fc13ea4f5d"
+
+[hooks.state.'C:\Users\picom\AppData\Roaming\orca\codex-runtime-home\home\hooks.json:session_start:0:0']
+trusted_hash = "sha256:f4fc41cd05aa26d6d58b7d8c4f9e02af7498f12c9cfaaa6757a9fadab1561333"
+
+[hooks.state.'C:\Users\picom\AppData\Roaming\orca\codex-runtime-home\home\hooks.json:user_prompt_submit:0:0']
+trusted_hash = "sha256:716cdae09508a15c72dbb251f33be2e6aa6f63a9c8a56988a6409426997552e8"
+
+[hooks.state.'C:\Users\picom\AppData\Roaming\orca\codex-runtime-home\home\hooks.json:subagent_start:0:0']
+trusted_hash = "sha256:82621254cc909abd3ce1f102dc68b99d6a339c80b8f542c35bb4faa1c31b34b9"
+
+[hooks.state.'C:\Users\picom\AppData\Roaming\orca\codex-runtime-home\home\hooks.json:subagent_stop:0:0']
+trusted_hash = "sha256:3957d002fe52420d5472c6b97b6088a62c52197d93fb6be961136d034f75a509"
+
+[hooks.state.'C:\Users\picom\AppData\Roaming\orca\codex-runtime-home\home\hooks.json:stop:0:0']
+trusted_hash = "sha256:99cfdc173dddf323a7abedc1daf09a1c60966e24afe36116a796de476ea38bdf"
