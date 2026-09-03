@@ -1,6 +1,6 @@
 # Canonical orchestration harness
 
-`.orchestrator/harness/` is the only project-owned runtime for event storage, graph execution, admission, verification, and Bridge behavior. It is self-contained: it does not import plugin caches, external profiles, credentials, or network services.
+`.orchestrator/harness/` is the only project-owned runtime for event storage, graph execution, admission, verification, and Bridge behavior. It does not import plugin caches, external profiles, or credentials. The automated scaffold lane launches only explicitly configured Graphify and agent-provider subprocesses.
 
 For the whole-repository map and the boundary between runtime, capability
 selection, routing, compatibility, and evidence, see the
@@ -16,9 +16,10 @@ Read-only evidence work does not need a full run DAG unless it has real dependen
 
 ```text
 node .orchestrator/harness/command-worker.mjs compile --capsule <capsule-dir> --parallel <peer-capsule> --skill <SKILL.md>
+# Add --fast only when the user explicitly requests accelerated mode.
 ```
 
-The compiler validates canonical read/write identities, forbidden paths, and parallel write overlap before emitting a prompt. The prompt begins `/fast`, forbids worker planning/delegation, names the authorized skills, and contains capsule hashes instead of inherited conversation. Native orchestration still supplies the requested model and reasoning settings. Compare those requested values with observed provider metadata; the prompt is not proof that fast mode activated.
+The compiler validates canonical read/write identities, forbidden paths, and exact or parent/child parallel write overlap before emitting a prompt. The prompt forbids worker planning/delegation, lists canonical read roots and owned writes, and contains capsule hashes instead of inherited conversation. Ordinary mode is the default. Only the explicit API option or CLI `--fast` adds the acceleration directive, and provider-observed state remains separate evidence.
 
 Independent, non-overlapping agents may run concurrently without an arbitrary model-call cap. The optimization target is serial transcript replay and oversized handoffs, not useful parallel calls. Keep complete tool output in an artifact and hand off typed digests.
 
@@ -30,7 +31,7 @@ node .orchestrator/harness/token-audit.mjs claude <result.json>
 npm --prefix .orchestrator/harness run test:light
 ```
 
-`bridge-launcher.mjs run-budgeted` continues to enforce exactly `tokens`, `toolCalls`, `wallSeconds`, and `processes`. Optional provider-level `usageDetails` is a content-free sidecar and never changes admission capacity.
+`bridge-launcher.mjs run-budgeted` remains the strict four-dimension admission lane for `tokens`, `toolCalls`, `wallSeconds`, and `processes`. The lightweight scaffold automation hard-stops elapsed wall time and its process tree, requires token telemetry for a successful provider response, and rejects post-observed token overages; current provider output does not expose a trustworthy tool-call or concurrent-process count, so those two blueprint fields are passed to the worker contract but are not claimed as hard runtime meters. Optional provider-level `usageDetails` is a content-free sidecar and never changes admission capacity.
 
 ## Contract-first virtual scaffold
 
@@ -40,8 +41,9 @@ deterministic scaffold and execution packet. The fail-closed order is:
 ```text
 trusted policy -> blueprint validation -> independent review quorum
   -> digest-bound gate -> deterministic plan -> verified materialization
-  -> maximum-safe waves -> bounded node attempts
-  -> explicit directed observed-graph comparison -> independent Judge
+  -> mandatory structural Graphify gate -> maximum-safe waves
+  -> bounded verified node attempts -> mandatory dependency Graphify gate
+  -> independent Judge
 ```
 
 The trusted policy, not blueprint self-claims, supplies task classification,
@@ -61,7 +63,13 @@ node .orchestrator/harness/scaffold-pipeline.mjs materialize <blueprint.json> <p
 node .orchestrator/harness/scaffold-pipeline.mjs attempt-begin <plan-dir> <ledger-dir> <node-id> <attempt-id>
 node .orchestrator/harness/scaffold-pipeline.mjs attempt-complete <plan-dir> <ledger-dir> <node-id> <attempt-id> <pass|fail> <result-artifact>
 node .orchestrator/harness/scaffold-pipeline.mjs graph-diff <blueprint.json> <policy.json> <observed-graph.json>
+node .orchestrator/harness/scaffold-pipeline.mjs orchestrate <blueprint.json> <policy.json> <gate.json> <workspace-root> <plan-dir> [--runtime-config <json>] [--fast]
 ```
+
+For `orchestrate`, `<plan-dir>` is the trusted control plane and must resolve
+outside `<workspace-root>`; this prevents a workspace-write coding agent from
+altering future capsules, the attempt ledger, or runtime events. The manual
+`plan` and `materialize` primitives retain their existing path behavior.
 
 `plan` writes the v2 execution graph, deterministic `waves.json`, manifest,
 sidecars, and six-file command-only capsules before product agents run.
@@ -72,14 +80,39 @@ interruption; differing or identity-uncertain files are preserved and rejected.
 Locks and Judge names are local workflow assertions, not authentication against
 a privileged filesystem actor.
 
-This CLI does not invoke a model. The host orchestrator reads each ready wave,
-preflights complete write sets, and dispatches the maximum disjoint ready set as
-zero-history `/fast` command-only workers. It records provider-observed fast
-state instead of inferring it from the prompt. Node retries are admitted only
-from the plan-bound attempt ledger and never add a back-edge to the outer DAG.
+Each blueprint file may bind `skillPaths` and `verificationCommands`. Selected
+skill paths are workspace-relative, become explicit read authority, and are
+named in the worker prompt; workers do not discover or attach additional
+skills. Verification commands are `{ "command": "...", "args": [...],
+"cwd": "optional/relative/path" }` argument vectors. They remain optional for
+the legacy manual primitives, while `orchestrate` requires at least one per
+file and executes them without a shell.
 
-The observed graph is also explicit input: the comparator neither creates nor
-updates it. It accepts Graphify's native node-link JSON (`links`) as well as the
+The legacy stage commands remain model-free primitives. `orchestrate` composes
+them into one resumable command: it creates or verifies the plan, materializes
+stubs, runs a fresh code-only structural graph gate, dispatches each maximum
+disjoint ready wave, runs gate-bound verification commands with bounded retry,
+and requires a fresh dependency graph match before returning `COMPLETE`.
+Coding agents own only their product file; the orchestrator writes result
+evidence. Workspace hashes detect additions, removals, type changes, or edits
+outside the active wave before later stages can start. The append-only event
+chain binds resume to the same plan, gate, policy, workspace, runtime config,
+and requested execution mode. Each worker receives the exact contract sidecar
+as a required read; a retry additionally receives only its own prior result
+evidence.
+
+The default adapter sends the compiled prompt to `codex exec --ephemeral` over
+stdin and invokes Graphify with argument arrays and no shell. A strict runtime
+config can substitute fake or local executables for deterministic testing.
+Accelerated mode is never inferred from blueprint, capsule, environment, or
+configuration content; only the explicit `--fast` request enables it. Node
+retries remain local to the plan-bound attempt ledger and never add a back-edge
+to the outer DAG.
+
+For the manual `graph-diff` command, the observed graph remains explicit input
+and the comparator neither creates nor updates it. The automated lane writes
+fresh pre/post Graphify output below the plan runtime directory, never this
+global harness root. Both lanes accept Graphify's native node-link JSON (`links`) as well as the
 compact harness form (`edges`). Graphify may store its NetworkX container as
 undirected while preserving each link's original source/target order; the
 blueprint's file DAG remains explicitly directed. Native comparison projects
@@ -91,10 +124,13 @@ provenance-free semantic nodes, and rejects missing, reversed, unexpected,
 aliased, dangling, or dependency self-loop relationships. In a target project
 that already has a Graphify graph, build or update it through that project's
 approved Graphify workflow, then pass that `graphify-out/graph.json` path to
-`graph-diff`. Comparison is closed-world for attributed source files: scope the
+`graph-diff`. Manual comparison is closed-world for attributed source files: scope the
 observed graph to the scaffold, or enumerate every attributed file in that
 graph in the blueprint. Unlisted attributed files are intentionally reported
-as `UNEXPECTED_SOURCE_FILE`.
+as `UNEXPECTED_SOURCE_FILE`. Automated structural and dependency gates project
+the larger target graph to declared files: the first proves every scaffold file
+is indexed without requiring stub imports, while the second requires the exact
+declared inter-file dependency set.
 
 Run the focused acceptance suite with:
 

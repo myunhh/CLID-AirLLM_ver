@@ -34,6 +34,24 @@
           "dependsOn": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
           "builderId": { "type": "string", "minLength": 1 },
           "retryCap": { "type": "integer", "minimum": 0 },
+          "skillPaths": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": { "type": "string", "minLength": 1, "pattern": "^(?!/)(?![A-Za-z]:)(?!.*\\\\)(?!.*(?:^|/)\\.\\.?(?:/|$))(?!.*//).+$" }
+          },
+          "verificationCommands": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["command", "args"],
+              "properties": {
+                "command": { "type": "string", "minLength": 1 },
+                "args": { "type": "array", "items": { "type": "string" } },
+                "cwd": { "type": "string", "minLength": 1, "pattern": "^(?!/)(?![A-Za-z]:)(?!.*\\\\)(?!.*(?:^|/)\\.\\.?(?:/|$))(?!.*//).+$" }
+              }
+            }
+          },
           "contract": {
             "type": "object",
             "additionalProperties": false,

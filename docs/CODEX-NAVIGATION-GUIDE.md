@@ -25,6 +25,8 @@ For read-only work with independent evidence questions, use deterministic collec
 
 Do not create Graphify output while navigating this harness. In a target project, Graphify is conditional on an existing graph unless the human explicitly approves graph creation.
 
+Invoking the approved virtual-scaffold `orchestrate` command is an explicit request to create fresh code-only pre/post Graphify artifacts for that named target. Its trusted plan directory must resolve outside the target workspace, and those artifacts belong below that external plan directory; the command must never create `graphify-out/` in this global harness root. Manual `plan` and `materialize` invocations retain their existing path behavior.
+
 For the project-owned orchestration runtime, use `.orchestrator/harness/README.md` as the canonical invocation guide. Record the exact command, exit status, and artifact path for every acceptance or rollback scenario. Python/Bridge checks are launcher-mediated; do not substitute an ambient interpreter.
 
 ## PR diff packet

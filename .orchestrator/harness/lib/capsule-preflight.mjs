@@ -46,9 +46,9 @@ export function preflightCapsules({ capsuleDir, parallelCapsuleDirs = [], reads 
     const peer = readCapsule(peerDir);
     let peerWorkspace;
     try { peerWorkspace = resolveWorkspaceRoot(peer.ownership.worktreePath); } catch (error) { throw new CapsulePreflightError('OWNERSHIP_INVALID', { pathCode: error.code }); }
-    const peerWrites = new Set(peer.ownership.allowedWriteFiles.map((item) => identity(item, peerWorkspace, 'OWNERSHIP_INVALID').canonicalAbsolutePath));
-    const overlap = requested.find((target) => peerWrites.has(target.canonicalAbsolutePath));
+    const peerWrites = peer.ownership.allowedWriteFiles.map((item) => identity(item, peerWorkspace, 'OWNERSHIP_INVALID'));
+    const overlap = requested.find((target) => peerWrites.some((peerTarget) => childOf(target.canonicalAbsolutePath, peerTarget.canonicalAbsolutePath) || childOf(peerTarget.canonicalAbsolutePath, target.canonicalAbsolutePath)));
     if (overlap) throw new CapsulePreflightError('PARALLEL_WRITE_OVERLAP', { target: overlap.declaredPath, peer: peer.root });
   }
-  return Object.freeze({ capsule, reads: Object.freeze(requestedReads.map((item) => item.canonicalAbsolutePath)), writes: Object.freeze(requested.map((item) => item.canonicalAbsolutePath)) });
+  return Object.freeze({ capsule, readRoots: Object.freeze(readable), reads: Object.freeze(requestedReads.map((item) => item.canonicalAbsolutePath)), writes: Object.freeze(requested.map((item) => item.canonicalAbsolutePath)) });
 }

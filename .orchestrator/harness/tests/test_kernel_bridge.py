@@ -3,6 +3,7 @@ import hashlib
 import json
 import os
 import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -24,6 +25,17 @@ class KernelBridgeTests(unittest.TestCase):
         }
         self.assertNotIn("jupyter", top_level)
         self.assertNotIn("unittest", top_level)
+
+    def test_public_probe_never_claims_escapable_posix_process_groups(self):
+        result = subprocess.run([sys.executable, str(BRIDGE), "probe-containment"], capture_output=True, text=True, check=False)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        report = json.loads(result.stdout)
+        if os.name == "nt":
+            self.assertTrue(report["available"])
+            self.assertEqual(report["provider"], "windows_job_object")
+        else:
+            self.assertFalse(report["available"])
+            self.assertEqual(report["reason"], "POSIX_PROCESS_GROUP_ESCAPE_UNCONTAINED")
 
     def test_python_brokers_event_append_through_node(self):
         with tempfile.TemporaryDirectory(prefix="ecc-python-broker-") as temporary:
@@ -58,6 +70,42 @@ class KernelBridgeTests(unittest.TestCase):
             serialized = (run_dir / "events.jsonl").read_text(encoding="utf-8")
             self.assertNotIn(body.decode(), serialized)
             self.assertIn("promptDigest", serialized)
+
+    def test_contained_runner_rejects_and_removes_malformed_private_input(self):
+        with tempfile.TemporaryDirectory(prefix="ecc-contained-invalid-") as temporary:
+            request_path = Path(temporary) / "private-request.json"
+            request_path.write_text(json.dumps({
+                "runner": {"command": sys.executable, "args": ["--version"], "cwd": temporary},
+                "stdinBase64": "not-valid-***",
+                "budget": {"tokens": 1, "toolCalls": 1, "wallSeconds": 2, "processes": 1},
+            }), encoding="utf-8")
+            result = subprocess.run(
+                [sys.executable, str(BRIDGE), "run-contained", "--request", str(request_path), "--skip-probe"],
+                capture_output=True, text=True, check=False,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            report = json.loads(result.stdout)
+            self.assertFalse(report["launched"])
+            self.assertIn("RUNNER_STDIN_INVALID", report["launchError"])
+            self.assertFalse(request_path.exists())
+
+    @unittest.skipUnless(os.name == "nt", "Windows capture-path validation")
+    def test_contained_runner_rejects_unconfined_capture_paths(self):
+        with tempfile.TemporaryDirectory(prefix="ecc-contained-path-") as temporary:
+            root = Path(temporary)
+            request_path = root / "lease.json.request"
+            request_path.write_text(json.dumps({
+                "runner": {"command": sys.executable, "args": ["--version"], "cwd": temporary},
+                "stdinBase64": "", "maxCaptureBytes": 1024,
+                "control": {"supervisorPid": os.getpid(), "nonce": "n", "stopFile": str(root / "lease.json.stop"), "stdoutPath": str(root.parent / "foreign.capture-stdout"), "stderrPath": str(root.parent / "foreign.capture-stderr")},
+                "budget": {"tokens": 1, "toolCalls": 1, "wallSeconds": 2, "processes": 1},
+            }), encoding="utf-8")
+            result = subprocess.run([sys.executable, str(BRIDGE), "run-contained", "--request", str(request_path), "--skip-probe"], capture_output=True, text=True, check=False)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            report = json.loads(result.stdout)
+            self.assertFalse(report["launched"])
+            self.assertIn("RUNNER_CONTROL_INVALID", report["launchError"])
+            self.assertFalse(request_path.exists())
 
 
 if __name__ == "__main__":

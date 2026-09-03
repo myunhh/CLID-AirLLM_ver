@@ -9,8 +9,8 @@ import { fileURLToPath } from 'node:url';
 import {
   BlueprintError, blueprintDigest, policyDigest, deriveReviewQuorum, validateBlueprint,
   validateReviewReceipt, createGateAttestation, validateGateAttestation, compilePlan,
-  writePlanDirectory, validatePlan, materializeScaffold, beginNodeAttempt,
-  completeNodeAttempt, compareObservedGraph, validateWaveWriteSets,
+  writePlanDirectory, validatePlan, materializeScaffold, beginNodeAttempt, readAttemptLedger,
+  completeNodeAttempt, compareObservedGraph, compareScaffoldGraph, validateWaveWriteSets,
 } from '../lib/blueprint-scaffold.mjs';
 
 const CLI = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'scaffold-pipeline.mjs');
@@ -103,13 +103,76 @@ test('generated capsule ownership remains bound to the target workspace from an 
   writePlanDirectory(planDir, plan, input);
   const capsule = plan.capsules.find((item) => item.id === plan.nodes.find((node) => node.path === 'src/a.mjs').id);
   const ownership = JSON.parse(capsule.files['OWNERSHIP.json']);
+  const targetNode = plan.nodes.find((node) => node.path === 'src/a.mjs'), targetManifest = plan.manifest.find((entry) => entry.path === 'src/a.mjs');
   assert.equal(path.isAbsolute(ownership.worktreePath), true);
   assert.equal(path.resolve(ownership.worktreePath).toLocaleLowerCase('en-US'), fs.realpathSync.native(root).toLocaleLowerCase('en-US'));
+  assert.deepEqual(ownership.allowedReadRoots, ['src/a.mjs', targetManifest.sidecarPath, targetNode.resultArtifactRef]);
+  assert.deepEqual(ownership.allowedWriteFiles, ['src/a.mjs']);
+  assert.deepEqual(plan.nodes.find((node) => node.path === 'src/a.mjs').writeSet, ['src/a.mjs']);
+  assert.equal(plan.nodes.find((node) => node.path === 'src/a.mjs').resultArtifactRef.includes('/results/'), true);
+  const dependentNode = plan.nodes.find((node) => node.path === 'src/b.mjs'), dependentManifest = plan.manifest.find((entry) => entry.path === 'src/b.mjs');
+  const dependentOwnership = JSON.parse(plan.capsules.find((item) => item.id === dependentNode.id).files['OWNERSHIP.json']);
+  assert.deepEqual(dependentOwnership.allowedReadRoots, ['src/b.mjs', 'src/a.mjs', dependentManifest.sidecarPath, dependentNode.resultArtifactRef]);
+  assert.deepEqual(dependentOwnership.allowedWriteFiles, ['src/b.mjs']);
   const capsuleDir = path.join(planDir, 'capsules', capsule.id);
   const result = spawnSync(process.execPath, [COMMAND_WORKER, 'compile', '--capsule', capsuleDir], { cwd: elsewhere, encoding: 'utf8' });
   assert.equal(result.status, 0, result.stderr);
   assert.equal(result.stdout.includes(path.join(root, 'src', 'a.mjs').toLocaleLowerCase('en-US')), true);
   assert.equal(result.stdout.includes(path.join(elsewhere, 'src', 'a.mjs').toLocaleLowerCase('en-US')), false);
+});
+
+test('verification commands are strict and bound into plans and contract sidecars', () => {
+  const root = temp(), input = fixture(root);
+  input.blueprint.files[0].verificationCommands = [{ command: 'node', args: ['--test', 'test/a.test.mjs'], cwd: 'packages/a' }];
+  for (const receipt of input.receipts) receipt.blueprintDigest = blueprintDigest(input.blueprint, input.policy);
+  input.gate = createGateAttestation(input);
+  const plan = compilePlan(input), node = plan.nodes.find((entry) => entry.path === 'src/a.mjs'), omitted = plan.nodes.find((entry) => entry.path === 'src/b.mjs');
+  assert.deepEqual(node.verificationCommands, input.blueprint.files[0].verificationCommands);
+  assert.deepEqual(omitted.verificationCommands, []);
+  assert.deepEqual(plan.executionGraph.nodes.find((entry) => entry.targetPath === 'src/a.mjs').verificationCommands, input.blueprint.files[0].verificationCommands);
+  assert.equal(plan.sidecars.find((sidecar) => sidecar.path.includes('src/a.mjs')).bytes.includes('"args":["--test","test/a.test.mjs"],"command":"node","cwd":"packages/a"'), true);
+  const withoutCommands = fixture(temp());
+  assert.notEqual(blueprintDigest(input.blueprint, input.policy), blueprintDigest(withoutCommands.blueprint, withoutCommands.policy));
+  for (const bad of [
+    [{ command: '', args: [] }],
+    [{ command: 'node', args: 'test.mjs' }],
+    [{ command: 'node', args: [], shell: true }],
+    [{ command: 'node', args: [], cwd: '../outside' }],
+  ]) {
+    const candidate = clone(input.blueprint); candidate.files[0].verificationCommands = bad;
+    failCode(() => validateBlueprint(candidate, input.policy), 'BLUEPRINT_VERIFICATION_COMMAND_INVALID');
+  }
+});
+
+test('skill paths are unique workspace-relative and bound into plans capsules and sidecars', () => {
+  const root = temp(), input = fixture(root);
+  input.blueprint.files[0].skillPaths = ['.agents/skills/javascript/SKILL.md', '.agents/skills/testing/SKILL.md'];
+  for (const receipt of input.receipts) receipt.blueprintDigest = blueprintDigest(input.blueprint, input.policy);
+  input.gate = createGateAttestation(input);
+  const plan = compilePlan(input), node = plan.nodes.find((entry) => entry.path === 'src/a.mjs'), omitted = plan.nodes.find((entry) => entry.path === 'src/b.mjs');
+  assert.deepEqual(node.skillPaths, input.blueprint.files[0].skillPaths);
+  assert.deepEqual(omitted.skillPaths, []);
+  assert.deepEqual(plan.executionGraph.nodes.find((entry) => entry.targetPath === 'src/a.mjs').skillPaths, input.blueprint.files[0].skillPaths);
+  const capsule = plan.capsules.find((entry) => entry.id === node.id), ownership = JSON.parse(capsule.files['OWNERSHIP.json']);
+  const manifest = plan.manifest.find((entry) => entry.path === 'src/a.mjs');
+  assert.deepEqual(ownership.allowedReadRoots, ['src/a.mjs', ...input.blueprint.files[0].skillPaths, manifest.sidecarPath, node.resultArtifactRef]);
+  assert.deepEqual(ownership.allowedWriteFiles, ['src/a.mjs']); assert.deepEqual(node.writeSet, ['src/a.mjs']);
+  assert.equal(capsule.files['CONTEXT.md'].includes(JSON.stringify(input.blueprint.files[0].skillPaths)), true);
+  assert.equal(plan.sidecars.find((sidecar) => sidecar.path.includes('src/a.mjs')).bytes.includes(JSON.stringify(input.blueprint.files[0].skillPaths)), true);
+  const withoutSkills = fixture(temp());
+  assert.notEqual(blueprintDigest(input.blueprint, input.policy), blueprintDigest(withoutSkills.blueprint, withoutSkills.policy));
+  for (const bad of [
+    '.agents/skills/javascript/SKILL.md',
+    ['.agents/skills/javascript/SKILL.md', '.agents/skills/javascript/SKILL.md'],
+    ['.agents/skills/javascript/SKILL.md', '.AGENTS/SKILLS/JAVASCRIPT/SKILL.MD'],
+    ['../outside/SKILL.md'],
+    ['C:/outside/SKILL.md'],
+    ['.agents\\skills\\javascript\\SKILL.md'],
+    [''],
+  ]) {
+    const candidate = clone(input.blueprint); candidate.files[0].skillPaths = bad;
+    failCode(() => validateBlueprint(candidate, input.policy), 'BLUEPRINT_SKILL_PATH_INVALID');
+  }
 });
 
 test('materialization is idempotent and rejects differing product bytes', () => {
@@ -156,8 +219,80 @@ test('attempt authority is plan bound and exactly two retries permit no fourth a
   assert.equal(beginNodeAttempt({ ledgerPath: ledger, plan: input.plan, nodeId: node.id, attemptId: 'fourth' }).status, 'ESCALATED');
 });
 
+test('budget-exceeded completion immediately escalates and remains a valid terminal ledger', () => {
+  const input = planFixture(temp()), ledger = path.join(input.workspaceRoot, 'budget-ledger.json'), node = input.plan.nodes.find((entry) => entry.retryCap === 2);
+  beginNodeAttempt({ ledgerPath: ledger, plan: input.plan, nodeId: node.id, attemptId: 'budgeted' });
+  const completed = completeNodeAttempt({ ledgerPath: ledger, plan: input.plan, nodeId: node.id, attemptId: 'budgeted', outcome: 'budget_exceeded', resultDigest: digest('budget exceeded result') });
+  assert.equal(completed.status, 'ESCALATED'); assert.equal(completed.attempts, 1);
+  const strict = readAttemptLedger(ledger, input.plan);
+  assert.equal(strict.nodes[node.id].status, 'ESCALATED'); assert.equal(strict.nodes[node.id].attempts[0].status, 'FAILED'); assert.equal(strict.nodes[node.id].attempts[0].failureReason, 'budget_exceeded');
+  const refused = beginNodeAttempt({ ledgerPath: ledger, plan: input.plan, nodeId: node.id, attemptId: 'must-not-run' });
+  assert.equal(refused.status, 'ESCALATED'); assert.equal(refused.attempts, 1);
+  assert.equal(readAttemptLedger(ledger, input.plan).nodes[node.id].attempts.length, 1);
+});
+
+test('unobserved usage immediately escalates and remains a valid terminal ledger', () => {
+  const input = planFixture(temp()), ledger = path.join(input.workspaceRoot, 'usage-unobserved-ledger.json'), node = input.plan.nodes.find((entry) => entry.retryCap === 2);
+  beginNodeAttempt({ ledgerPath: ledger, plan: input.plan, nodeId: node.id, attemptId: 'provider-succeeded-without-usage' });
+  const completed = completeNodeAttempt({ ledgerPath: ledger, plan: input.plan, nodeId: node.id, attemptId: 'provider-succeeded-without-usage', outcome: 'usage_unobserved', resultDigest: digest('provider response without usage') });
+  assert.equal(completed.status, 'ESCALATED'); assert.equal(completed.attempts, 1);
+  const strict = readAttemptLedger(ledger, input.plan);
+  assert.equal(strict.nodes[node.id].attempts[0].status, 'FAILED'); assert.equal(strict.nodes[node.id].attempts[0].failureReason, 'usage_unobserved');
+  assert.deepEqual(beginNodeAttempt({ ledgerPath: ledger, plan: input.plan, nodeId: node.id, attemptId: 'must-not-run' }), { nodeId: node.id, status: 'ESCALATED', attempts: 1 });
+  assert.equal(readAttemptLedger(ledger, input.plan).nodes[node.id].attempts.length, 1);
+});
+
+test('downstream attempts require all plan-declared dependencies to have succeeded', () => {
+  const input = planFixture(temp()), ledger = path.join(input.workspaceRoot, 'dependency-ledger.json');
+  const prerequisite = input.plan.nodes.find((entry) => entry.path === 'src/a.mjs'), downstream = input.plan.nodes.find((entry) => entry.path === 'src/b.mjs');
+  failCode(() => beginNodeAttempt({ ledgerPath: ledger, plan: input.plan, nodeId: downstream.id, attemptId: 'too-early' }), 'ATTEMPT_DEPENDENCIES_INCOMPLETE');
+  beginNodeAttempt({ ledgerPath: ledger, plan: input.plan, nodeId: prerequisite.id, attemptId: 'prerequisite' });
+  completeNodeAttempt({ ledgerPath: ledger, plan: input.plan, nodeId: prerequisite.id, attemptId: 'prerequisite', outcome: 'succeeded', resultDigest: digest('prerequisite result') });
+  assert.equal(beginNodeAttempt({ ledgerPath: ledger, plan: input.plan, nodeId: downstream.id, attemptId: 'now-ready' }).status, 'RUNNING');
+});
+
+test('attempt ledgers reject malformed nested state and recover only verified dead-owner locks', () => {
+  const input = planFixture(temp()), node = input.plan.nodes.find((entry) => entry.path === 'src/a.mjs');
+  for (const [name, nodes] of [
+    ['unknown-node', { unknown: { retryCap: 0, status: 'READY', attempts: [] } }],
+    ['bad-ordinal', { [node.id]: { retryCap: node.retryCap, status: 'RUNNING', attempts: [{ attemptId: 'bad', ordinal: 2, status: 'RUNNING' }] } }],
+    ['bad-status', { [node.id]: { retryCap: node.retryCap, status: 'SUCCEEDED', attempts: [] } }],
+  ]) {
+    const ledger = path.join(input.workspaceRoot, `${name}.json`);
+    fs.writeFileSync(ledger, JSON.stringify({ schemaVersion: 1, planDigest: input.plan.planDigest, nodes }));
+    failCode(() => beginNodeAttempt({ ledgerPath: ledger, plan: input.plan, nodeId: node.id, attemptId: `try-${name}` }), 'ATTEMPT_LEDGER_INVALID');
+    assert.equal(fs.existsSync(`${ledger}.lock`), false);
+  }
+  const staleLedger = path.join(input.workspaceRoot, 'stale-ledger.json'), staleLock = `${staleLedger}.lock`;
+  fs.mkdirSync(staleLock);
+  fs.writeFileSync(path.join(staleLock, 'owner.json'), JSON.stringify({ schemaVersion: 1, pid: 99999996, transactionId: 'dead-ledger-owner', planDigest: input.plan.planDigest, workspaceIdentity: digest(JSON.stringify({ ledgerPath: path.resolve(staleLedger) })) }));
+  assert.equal(beginNodeAttempt({ ledgerPath: staleLedger, plan: input.plan, nodeId: node.id, attemptId: 'after-stale' }).status, 'RUNNING');
+  assert.equal(fs.existsSync(staleLock), false);
+  const liveLedger = path.join(input.workspaceRoot, 'live-ledger.json'), liveLock = `${liveLedger}.lock`;
+  fs.mkdirSync(liveLock);
+  fs.writeFileSync(path.join(liveLock, 'owner.json'), JSON.stringify({ schemaVersion: 1, pid: process.pid, transactionId: 'live-ledger-owner', planDigest: input.plan.planDigest, workspaceIdentity: digest(JSON.stringify({ ledgerPath: path.resolve(liveLedger) })) }));
+  failCode(() => beginNodeAttempt({ ledgerPath: liveLedger, plan: input.plan, nodeId: node.id, attemptId: 'blocked-live' }), 'PIPELINE_LOCKED');
+  assert.equal(fs.existsSync(liveLock), true);
+  const uncertainLedger = path.join(input.workspaceRoot, 'uncertain-ledger.json'), uncertainLock = `${uncertainLedger}.lock`;
+  fs.mkdirSync(uncertainLock); fs.writeFileSync(path.join(uncertainLock, 'owner.json'), '{}');
+  failCode(() => beginNodeAttempt({ ledgerPath: uncertainLedger, plan: input.plan, nodeId: node.id, attemptId: 'blocked-uncertain' }), 'LOCK_IDENTITY_UNCERTAIN');
+  assert.equal(fs.existsSync(uncertainLock), true);
+});
+
+test('strict attempt-ledger reads reject forged nested state against the supplied plan', () => {
+  const input = planFixture(temp()), ledger = path.join(input.workspaceRoot, 'strict-read-ledger.json'), node = input.plan.nodes.find((entry) => entry.path === 'src/a.mjs');
+  beginNodeAttempt({ ledgerPath: ledger, plan: input.plan, nodeId: node.id, attemptId: 'valid' });
+  assert.equal(readAttemptLedger(ledger, input.plan).nodes[node.id].status, 'RUNNING');
+  const forged = JSON.parse(fs.readFileSync(ledger, 'utf8')); forged.nodes[node.id].attempts[0].ordinal = 99; fs.writeFileSync(ledger, JSON.stringify(forged));
+  failCode(() => readAttemptLedger(ledger, input.plan), 'ATTEMPT_LEDGER_INVALID');
+  assert.equal(readAttemptLedger(ledger).nodes[node.id].attempts[0].ordinal, 99);
+});
+
 test('attempts after verified success are terminal and result digests cannot replay', () => {
-  const input = planFixture(temp()), ledger = path.join(input.workspaceRoot, 'ledger.json'), node = input.plan.nodes[0], replayNode = input.plan.nodes[1], result = digest('pass');
+  const input = fixture(temp()); input.blueprint.files[1].retryCap = 2;
+  for (const receipt of input.receipts) receipt.blueprintDigest = blueprintDigest(input.blueprint, input.policy);
+  input.gate = createGateAttestation(input); input.plan = compilePlan(input);
+  const ledger = path.join(input.workspaceRoot, 'ledger.json'), node = input.plan.nodes.find((entry) => entry.path === 'src/a.mjs'), replayNode = input.plan.nodes.find((entry) => entry.path === 'src/b.mjs'), result = digest('pass');
   beginNodeAttempt({ ledgerPath: ledger, plan: input.plan, nodeId: node.id, attemptId: 'one' });
   assert.equal(completeNodeAttempt({ ledgerPath: ledger, plan: input.plan, nodeId: node.id, attemptId: 'one', outcome: 'succeeded', resultDigest: result }).status, 'SUCCEEDED');
   failCode(() => beginNodeAttempt({ ledgerPath: ledger, plan: input.plan, nodeId: node.id, attemptId: 'two' }), 'ATTEMPT_TERMINAL');
@@ -259,6 +394,70 @@ test('observed graph accepts native Graphify node-link JSON and ignores provenan
   failCode(() => compareObservedGraph({ ...input, observedGraph: { directed: false, nodes: [{ id: 'a', source_file: 'src/a.mjs' }], links: [{ source: 'a', target: 'a' }] } }), 'OBSERVED_GRAPH_INVALID');
   const callsOnly = compareObservedGraph({ ...input, observedGraph: { directed: false, nodes: [{ id: 'a', source_file: 'src/a.mjs' }, { id: 'b', source_file: 'src/b.mjs' }], links: [{ source: 'b', target: 'a', relation: 'calls' }] } });
   assert.equal(callsOnly.matches, false); assert.deepEqual(callsOnly.missingEdges, ['src/b.mjs->src/a.mjs']); assert.deepEqual(callsOnly.unexpectedEdges, []);
+});
+
+test('phased comparator accepts only the raw Graphify extraction envelope and filters relations', () => {
+  const input = fixture(temp()), rawGraphify = {
+    nodes: [
+      { id: 'module-a', label: 'src/a.mjs', source_file: 'src/a.mjs', type: 'module' },
+      { id: 'symbol-a', label: 'a', source_file: 'src/a.mjs', type: 'function' },
+      { id: 'module-b', label: 'src/b.mjs', source_file: 'src/b.mjs', type: 'module' },
+      { id: 'symbol-b', label: 'b', source_file: 'src/b.mjs', type: 'function' },
+      { id: 'other', label: 'other', source_file: 'src/other.mjs', type: 'module' },
+    ],
+    edges: [
+      { source: 'module-a', target: 'symbol-a', relation: 'contains', source_file: 'src/a.mjs' },
+      { source: 'module-b', target: 'module-a', relation: 'imports_from', source_file: 'src/b.mjs' },
+      { source: 'symbol-b', target: 'symbol-a', relation: 'imports', source_file: 'src/b.mjs' },
+      { source: 'other', target: 'module-a', relation: 'contains', source_file: 'src/other.mjs' },
+    ],
+    hyperedges: [],
+    input_tokens: 0,
+    output_tokens: 0,
+  };
+  const dependencies = compareScaffoldGraph({ ...input, observedGraph: rawGraphify, phase: 'dependencies' });
+  assert.equal(dependencies.matches, true); assert.deepEqual(dependencies.missingEdges, []); assert.deepEqual(dependencies.unexpectedEdges, []); assert.deepEqual(dependencies.errors, []);
+  assert.equal(compareScaffoldGraph({ ...input, observedGraph: rawGraphify, phase: 'structure' }).matches, true);
+  const extraTopLevel = { ...rawGraphify, metadata: {} };
+  failCode(() => compareScaffoldGraph({ ...input, observedGraph: extraTopLevel, phase: 'dependencies' }), 'OBSERVED_GRAPH_INVALID');
+  const missingRelation = clone(rawGraphify); delete missingRelation.edges[0].relation;
+  failCode(() => compareScaffoldGraph({ ...input, observedGraph: missingRelation, phase: 'dependencies' }), 'OBSERVED_GRAPH_INVALID');
+  for (const malformed of [
+    { ...rawGraphify, input_tokens: -1 },
+    { ...rawGraphify, input_tokens: Number.POSITIVE_INFINITY },
+    { ...rawGraphify, output_tokens: '0' },
+    Object.fromEntries(Object.entries(rawGraphify).filter(([key]) => key !== 'output_tokens')),
+    { nodes: rawGraphify.nodes, edges: rawGraphify.edges, hyperedges: [] },
+  ]) failCode(() => compareScaffoldGraph({ ...input, observedGraph: malformed, phase: 'dependencies' }), 'OBSERVED_GRAPH_INVALID');
+});
+
+test('phased graph comparison separates declared structure from exact declared dependencies', () => {
+  const input = fixture(temp()), observedGraph = {
+    directed: false,
+    nodes: [
+      { id: 'a', source_file: 'src/a.mjs' },
+      { id: 'b', source_file: 'src/b.mjs' },
+      { id: 'unrelated', source_file: 'src/unrelated.mjs' },
+    ],
+    links: [
+      { source: 'a', target: 'b', relation: 'imports' },
+      { source: 'unrelated', target: 'a', relation: 'imports' },
+    ],
+  };
+  const structure = compareScaffoldGraph({ ...input, observedGraph, phase: 'structure' });
+  assert.equal(structure.phase, 'structure'); assert.equal(structure.matches, true);
+  assert.deepEqual(structure.missingEdges, []); assert.deepEqual(structure.unexpectedEdges, []); assert.deepEqual(structure.errors, []);
+  const dependencies = compareScaffoldGraph({ ...input, observedGraph, phase: 'dependencies' });
+  assert.equal(dependencies.phase, 'dependencies'); assert.equal(dependencies.matches, false);
+  assert.deepEqual(dependencies.missingEdges, ['src/b.mjs->src/a.mjs']);
+  assert.deepEqual(dependencies.unexpectedEdges, ['src/a.mjs->src/b.mjs']); assert.deepEqual(dependencies.errors, []);
+  const exact = clone(observedGraph); exact.links[0] = { source: 'b', target: 'a', relation: 'imports_from' };
+  assert.equal(compareScaffoldGraph({ ...input, observedGraph: exact, phase: 'dependencies' }).matches, true);
+  const missing = clone(exact); missing.nodes = missing.nodes.filter((node) => node.id !== 'b'); missing.links = missing.links.filter((edge) => edge.source !== 'b' && edge.target !== 'b');
+  assert.deepEqual(compareScaffoldGraph({ ...input, observedGraph: missing, phase: 'structure' }).errors.map((error) => error.code), ['DECLARED_FILE_MISSING']);
+  failCode(() => compareScaffoldGraph({ ...input, observedGraph, phase: 'edges' }), 'OBSERVED_GRAPH_PHASE_INVALID');
+  const legacy = compareObservedGraph({ ...input, observedGraph });
+  assert.equal(legacy.errors.some((error) => error.code === 'UNEXPECTED_SOURCE_FILE'), true);
 });
 
 test('graph-diff CLI mismatch exits one and creates no files', () => {

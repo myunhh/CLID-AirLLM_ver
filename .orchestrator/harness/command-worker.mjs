@@ -4,22 +4,32 @@ import { fileURLToPath } from 'node:url';
 import { readCapsule, preflightCapsules } from './lib/capsule-preflight.mjs';
 
 const ordered = ['TASK.md', 'ACCEPTANCE.md', 'BUDGET.json', 'CONTEXT.md', 'OWNERSHIP.json', 'RESULT.md'];
-export function compileWorkerCommand({ capsuleDir, parallelCapsuleDirs = [], reads = [], writes, skillPaths = [] } = {}) {
+export function compileWorkerCommand({ capsuleDir, parallelCapsuleDirs = [], reads = [], writes, skillPaths = [], fast = false } = {}) {
   const preflight = preflightCapsules({ capsuleDir, parallelCapsuleDirs, reads: [...reads, ...skillPaths], writes });
   const capsule = readCapsule(capsuleDir);
   const sources = ordered.map((name) => `${name} sha256=${createHash('sha256').update(capsule.files[name]).digest('hex')}`).join('\n');
-  return `/fast\nYou are a command-only worker. Code and test only. Do not plan, replan, delegate, or expand scope.\nCapsule: ${capsule.root}\nAuthorized reads: ${preflight.reads.join(', ')}\nAuthorized skills: ${skillPaths.map((item) => path.resolve(item)).join(', ')}\nOwned writes: ${preflight.writes.join(', ')}\nSources:\n${sources}\nExecute only the capsule instructions and stop on ownership violation.`;
+  const directive = fast === true ? '/fast\n' : '';
+  const requiredReads = preflight.reads.slice(0, reads.length), skills = preflight.reads.slice(reads.length);
+  let capsuleBudget; try { capsuleBudget = JSON.stringify(JSON.parse(capsule.files['BUDGET.json'])); } catch { throw new TypeError('BUDGET_INVALID'); }
+  return `${directive}You are a command-only worker. Code and test only. Do not plan, replan, delegate, or expand scope.\nCapsule: ${capsule.root}\nAuthorized reads: ${preflight.readRoots.join(', ')}\nRequired specification/evidence reads: ${requiredReads.join(', ')}\nAuthorized skills: ${skills.join(', ')}\nCapsule budget: ${capsuleBudget}\nOwned writes: ${preflight.writes.join(', ')}\nSources:\n${sources}\nBefore coding, read every listed required specification/evidence path and every selected SKILL.md, then execute the capsule contract. Stop on ownership violation.`;
 }
 
 export function parseCompileArguments(argv) {
   const result = { parallelCapsuleDirs: [], reads: [], skillPaths: [] };
   const keys = new Map([['--capsule', 'capsuleDir'], ['--parallel', 'parallelCapsuleDirs'], ['--read', 'reads'], ['--write', 'writes'], ['--skill', 'skillPaths']]);
   if (argv[0] !== 'compile') throw new TypeError('USAGE');
-  for (let index = 1; index < argv.length; index += 2) {
+  for (let index = 1; index < argv.length;) {
+    if (argv[index] === '--fast') {
+      if (result.fast === true) throw new TypeError('USAGE');
+      result.fast = true;
+      index += 1;
+      continue;
+    }
     const destination = keys.get(argv[index]); const value = argv[index + 1];
     if (!destination || !value || value.startsWith('--')) throw new TypeError('USAGE');
     if (destination === 'capsuleDir') { if (result.capsuleDir) throw new TypeError('USAGE'); result.capsuleDir = value; }
     else { result[destination] ??= []; result[destination].push(value); }
+    index += 2;
   }
   if (!result.capsuleDir) throw new TypeError('USAGE');
   return result;

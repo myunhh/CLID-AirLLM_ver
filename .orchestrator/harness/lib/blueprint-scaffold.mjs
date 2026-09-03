@@ -11,7 +11,7 @@ import { canonicalPathIdentity, resolveWorkspaceRoot } from './path-identity.mjs
 export const BLUEPRINT_SCHEMA_VERSION = 1;
 export const REVIEW_RECEIPT_SCHEMA_VERSION = 1;
 export const PLAN_SCHEMA_VERSION = 1;
-export const COMPILER_VERSION = '1.0.0';
+export const COMPILER_VERSION = '1.2.0';
 export const POLICY_SCHEMA_VERSION = 1;
 export const GRAPH_SCHEMA_VERSION = 2;
 export const ATTEMPT_LEDGER_SCHEMA_VERSION = 1;
@@ -31,6 +31,7 @@ const ownKeys = (value, required, optional = []) => {
   return required.every((key) => Object.hasOwn(value, key)) && Object.keys(value).every((key) => permitted.has(key));
 };
 const strings = (value, { nonempty = true, unique = false } = {}) => Array.isArray(value) && (!nonempty || value.length > 0) && value.every((item) => typeof item === 'string' && item.length > 0) && (!unique || new Set(value).size === value.length);
+const stringArray = (value) => Array.isArray(value) && value.every((item) => typeof item === 'string');
 const freeze = (value) => Object.freeze(value);
 
 function portableKey(value, code = 'PATH_INVALID') {
@@ -86,8 +87,20 @@ export function validateBlueprint(blueprint, policyInput) {
   strictBudget(blueprint.defaultBudget);
   const paths = [], nodeIds = new Set();
   for (const file of blueprint.files) {
-    if (!ownKeys(file, ['path', 'dependsOn', 'builderId', 'contract', 'instructions', 'stub'], ['retryCap', 'budget']) || !strings(file.dependsOn, { nonempty: false, unique: true }) || !blueprint.builders.includes(file.builderId) || !Number.isSafeInteger(file.retryCap ?? 0) || (file.retryCap ?? 0) < 0 || typeof file.instructions !== 'string' || !file.instructions || typeof file.stub !== 'string' || !file.stub.includes('IMPLEMENTATION_REQUIRED') || !ownKeys(file.contract, ['purpose', 'exports', 'acceptance']) || typeof file.contract.purpose !== 'string' || !file.contract.purpose || !Array.isArray(file.contract.exports) || !file.contract.exports.every((v) => typeof v === 'string') || !strings(file.contract.acceptance)) fail('BLUEPRINT_FILE_INVALID', { path: file?.path });
+    if (!ownKeys(file, ['path', 'dependsOn', 'builderId', 'contract', 'instructions', 'stub'], ['retryCap', 'budget', 'verificationCommands', 'skillPaths']) || !strings(file.dependsOn, { nonempty: false, unique: true }) || !blueprint.builders.includes(file.builderId) || !Number.isSafeInteger(file.retryCap ?? 0) || (file.retryCap ?? 0) < 0 || typeof file.instructions !== 'string' || !file.instructions || typeof file.stub !== 'string' || !file.stub.includes('IMPLEMENTATION_REQUIRED') || !ownKeys(file.contract, ['purpose', 'exports', 'acceptance']) || typeof file.contract.purpose !== 'string' || !file.contract.purpose || !Array.isArray(file.contract.exports) || !file.contract.exports.every((v) => typeof v === 'string') || !strings(file.contract.acceptance)) fail('BLUEPRINT_FILE_INVALID', { path: file?.path });
     portableKey(file.path);
+    if (file.skillPaths !== undefined) {
+      if (!strings(file.skillPaths, { nonempty: false, unique: true })) fail('BLUEPRINT_SKILL_PATH_INVALID', { path: file.path });
+      const skillKeys = file.skillPaths.map((skillPath) => portableKey(skillPath, 'BLUEPRINT_SKILL_PATH_INVALID'));
+      if (new Set(skillKeys).size !== skillKeys.length) fail('BLUEPRINT_SKILL_PATH_INVALID', { path: file.path });
+    }
+    if (file.verificationCommands !== undefined) {
+      if (!Array.isArray(file.verificationCommands)) fail('BLUEPRINT_FILE_INVALID', { path: file.path });
+      for (const verification of file.verificationCommands) {
+        if (!ownKeys(verification, ['command', 'args'], ['cwd']) || typeof verification.command !== 'string' || verification.command.length === 0 || !stringArray(verification.args)) fail('BLUEPRINT_VERIFICATION_COMMAND_INVALID', { path: file.path });
+        if (verification.cwd !== undefined) portableKey(verification.cwd, 'BLUEPRINT_VERIFICATION_COMMAND_INVALID');
+      }
+    }
     if (file.budget !== undefined) strictBudget(file.budget);
     if (policy && (file.retryCap ?? 0) > policy.maxRetryCap) fail('RETRY_CAP_EXCEEDS_POLICY', { path: file.path });
     paths.push(file.path);
@@ -170,8 +183,8 @@ function capsuleFiles(blueprint, file, node, policy, workspace) {
     'TASK.md': `# Objective\n\nImplement ${file.path} according to its contract sidecar.\n`,
     'ACCEPTANCE.md': `# Acceptance\n\n${file.contract.acceptance.map((item) => `- ${item}`).join('\n')}\n`,
     'BUDGET.json': `${canonicalJson(node.budgets)}\n`,
-    'CONTEXT.md': `# Context\n\nContract: ${sidecarFor(blueprint.blueprintId, file.path)}\nRetry cap: ${node.retryCap}\nInherited context: 0\n`,
-    'OWNERSHIP.json': `${canonicalJson({ worktreePath: workspace.canonicalWorkspaceRoot, allowedReadRoots: ['.orchestrator/blueprints', ...file.dependsOn], allowedWriteFiles: owned, forbiddenPaths: forbidden })}\n`,
+    'CONTEXT.md': `# Context\n\nContract: ${sidecarFor(blueprint.blueprintId, file.path)}\nSkills: ${canonicalJson(node.skillPaths)}\nRetry cap: ${node.retryCap}\nInherited context: 0\n`,
+    'OWNERSHIP.json': `${canonicalJson({ worktreePath: workspace.canonicalWorkspaceRoot, allowedReadRoots: [file.path, ...file.dependsOn, ...node.skillPaths, sidecarFor(blueprint.blueprintId, file.path), node.resultArtifactRef], allowedWriteFiles: owned, forbiddenPaths: forbidden })}\n`,
     'RESULT.md': '# Result\n\nStatus: READY\n',
   };
 }
@@ -206,7 +219,7 @@ export function compilePlan({ blueprint, policy, gate, receipts, findingsRoot, w
   const byKey = new Map(blueprint.files.map((file) => [portableKey(file.path), file]));
   const nodes = blueprint.files.map((file) => {
     const id = nodeIdFor(file.path), sidecar = sidecarFor(blueprint.blueprintId, file.path), result = resultFor(blueprint.blueprintId, id);
-    return { id, path: file.path, dependsOn: file.dependsOn.map((dep) => nodeIdFor(byKey.get(portableKey(dep)).path)).sort(), acceptance: [...file.contract.acceptance], builderIds: [file.builderId], judgeNonce: `judge-${canonicalHash({ blueprint: blueprintDigest(blueprint, policy), id }).slice(0, 32)}`, resultArtifactRef: result, budgets: strictBudget(file.budget ?? blueprint.defaultBudget), retryCap: file.retryCap ?? 0, writeSet: [file.path, result] };
+    return { id, path: file.path, dependsOn: file.dependsOn.map((dep) => nodeIdFor(byKey.get(portableKey(dep)).path)).sort(), acceptance: [...file.contract.acceptance], verificationCommands: (file.verificationCommands ?? []).map((verification) => ({ ...verification, args: [...verification.args] })), skillPaths: [...(file.skillPaths ?? [])], builderIds: [file.builderId], judgeNonce: `judge-${canonicalHash({ blueprint: blueprintDigest(blueprint, policy), id }).slice(0, 32)}`, resultArtifactRef: result, budgets: strictBudget(file.budget ?? blueprint.defaultBudget), retryCap: file.retryCap ?? 0, writeSet: [file.path] };
   }).sort((a, b) => a.id.localeCompare(b.id));
   const derived = [];
   for (const file of blueprint.files) derived.push(file.path, sidecarFor(blueprint.blueprintId, file.path), resultFor(blueprint.blueprintId, nodeIdFor(file.path)));
@@ -216,7 +229,7 @@ export function compilePlan({ blueprint, policy, gate, receipts, findingsRoot, w
   const graph = { schemaVersion: GRAPH_SCHEMA_VERSION, runId: `blueprint-${blueprint.blueprintId}-${blueprintDigest(blueprint, policy).slice(0, 12)}`, builders: [...blueprint.builders], judges: [...blueprint.judges], nodes: nodes.map(({ path: targetPath, ...node }) => ({ ...node, targetPath })) };
   try { validateGraph(graph); } catch (error) { fail('EXECUTION_GRAPH_INVALID', { cause: error.code }); }
   const waves = topologicalWaves(nodes);
-  const sidecars = blueprint.files.map((file) => ({ path: sidecarFor(blueprint.blueprintId, file.path), bytes: `# Contract: ${file.path}\n\nPurpose: ${file.contract.purpose}\n\n## Exports\n\n${file.contract.exports.map((v) => `- ${v}`).join('\n')}\n\n## Acceptance\n\n${file.contract.acceptance.map((v) => `- ${v}`).join('\n')}\n\n## Instructions\n\n${file.instructions}\n` })).sort((a, b) => a.path.localeCompare(b.path));
+  const sidecars = blueprint.files.map((file) => ({ path: sidecarFor(blueprint.blueprintId, file.path), bytes: `# Contract: ${file.path}\n\nPurpose: ${file.contract.purpose}\n\n## Exports\n\n${file.contract.exports.map((v) => `- ${v}`).join('\n')}\n\n## Acceptance\n\n${file.contract.acceptance.map((v) => `- ${v}`).join('\n')}\n\n## Verification Commands\n\n\`\`\`json\n${canonicalJson(file.verificationCommands ?? [])}\n\`\`\`\n\n## Skills\n\n\`\`\`json\n${canonicalJson(file.skillPaths ?? [])}\n\`\`\`\n\n## Instructions\n\n${file.instructions}\n` })).sort((a, b) => a.path.localeCompare(b.path));
   const capsules = nodes.map((node) => { const file = byKey.get(portableKey(node.path)); return { id: node.id, directory: capsuleFor(blueprint.blueprintId, node.id), files: capsuleFiles(blueprint, file, node, policy, authorizedWorkspace) }; });
   const manifest = blueprint.files.map((file) => ({ path: file.path, digest: sha256Bytes(file.stub), sidecarPath: sidecarFor(blueprint.blueprintId, file.path), sidecarDigest: sha256Bytes(sidecars.find((s) => s.path === sidecarFor(blueprint.blueprintId, file.path)).bytes) })).sort((a, b) => a.path.localeCompare(b.path));
   const authorization = { blueprintDigest: blueprintDigest(blueprint, policy), gateAttestationDigest: gate.attestationDigest, schemaVersion: BLUEPRINT_SCHEMA_VERSION, compilerVersion: COMPILER_VERSION, policyVersion: policy.policyVersion, policyDigest: policyDigest(policy), reservedRootsDigest: canonicalHash(policy.reservedRoots), workspaceIdentity };
@@ -401,15 +414,62 @@ export function materializeScaffold({ blueprint, policy, gate, receipts, finding
 }
 export const materialize = materializeScaffold;
 
-function withLedgerLock(file, callback) {
-  const absolute = path.resolve(file), lock = `${absolute}.lock`; fs.mkdirSync(path.dirname(absolute), { recursive: true }); acquireLock(lock);
+function acquireAttemptLedgerLock(lock, planDigest, ledgerPath) {
+  const owner = { schemaVersion: 1, pid: process.pid, transactionId: randomUUID(), planDigest, workspaceIdentity: canonicalHash({ ledgerPath }) };
+  const stale = acquireLock(lock, owner);
+  if (!stale) return;
+  if (!Number.isSafeInteger(stale.pid) || stale.pid <= 0 || typeof stale.transactionId !== 'string' || !stale.transactionId || !DIGEST.test(stale.planDigest ?? '') || stale.workspaceIdentity !== owner.workspaceIdentity) fail('LOCK_IDENTITY_UNCERTAIN');
+  let entries;
+  try { entries = fs.readdirSync(lock); } catch { fail('LOCK_IDENTITY_UNCERTAIN'); }
+  if (entries.length !== 1 || entries[0] !== 'owner.json') fail('LOCK_IDENTITY_UNCERTAIN');
+  const recovery = `${lock}.stale-${process.pid}-${randomUUID()}`;
+  try { fs.renameSync(lock, recovery); } catch { fail('PIPELINE_LOCKED'); }
+  try {
+    const moved = readStrictJson(path.join(recovery, 'owner.json'), 'LOCK_IDENTITY_UNCERTAIN');
+    if (canonicalJson(moved) !== canonicalJson(stale) || processAlive(moved.pid)) fail('LOCK_IDENTITY_UNCERTAIN');
+    fs.rmSync(recovery, { recursive: true });
+    acquireLock(lock, owner);
+  } catch (error) {
+    try { if (fs.existsSync(recovery) && !fs.existsSync(lock)) fs.renameSync(recovery, lock); } catch {}
+    throw error;
+  }
+}
+function validateAttemptLedger(state, plan) {
+  if (!ownKeys(state, ['schemaVersion', 'planDigest', 'nodes']) || state.schemaVersion !== ATTEMPT_LEDGER_SCHEMA_VERSION || state.planDigest !== plan.planDigest || !state.nodes || typeof state.nodes !== 'object' || Array.isArray(state.nodes)) fail('ATTEMPT_LEDGER_INVALID');
+  const contracts = new Map(plan.nodes.map((node) => [node.id, node])), attemptIds = new Set(), resultDigests = new Set();
+  for (const [nodeId, node] of Object.entries(state.nodes)) {
+    const contract = contracts.get(nodeId);
+    if (!contract || !ownKeys(node, ['retryCap', 'status', 'attempts']) || node.retryCap !== contract.retryCap || !['READY', 'RUNNING', 'SUCCEEDED', 'ESCALATED'].includes(node.status) || !Array.isArray(node.attempts)) fail('ATTEMPT_LEDGER_INVALID');
+    for (let index = 0; index < node.attempts.length; index += 1) {
+      const attempt = node.attempts[index], terminal = attempt?.status === 'FAILED' || attempt?.status === 'SUCCEEDED';
+      if (!ownKeys(attempt, ['attemptId', 'ordinal', 'status'], terminal ? ['resultDigest', 'failureReason'] : []) || typeof attempt.attemptId !== 'string' || !attempt.attemptId || attempt.ordinal !== index + 1 || !['RUNNING', 'FAILED', 'SUCCEEDED'].includes(attempt.status) || (terminal && !DIGEST.test(attempt.resultDigest ?? '')) || (!terminal && Object.hasOwn(attempt, 'resultDigest')) || (attempt.failureReason !== undefined && (attempt.status !== 'FAILED' || !['budget_exceeded', 'usage_unobserved'].includes(attempt.failureReason))) || attemptIds.has(attempt.attemptId) || (terminal && resultDigests.has(attempt.resultDigest))) fail('ATTEMPT_LEDGER_INVALID');
+      attemptIds.add(attempt.attemptId); if (terminal) resultDigests.add(attempt.resultDigest);
+    }
+    const statuses = node.attempts.map((attempt) => attempt.status), last = statuses.at(-1), terminalUsageFailureIndex = node.attempts.findIndex((attempt) => ['budget_exceeded', 'usage_unobserved'].includes(attempt.failureReason)), hasTerminalUsageFailure = terminalUsageFailureIndex >= 0;
+    const consistent = node.status === 'READY' ? !hasTerminalUsageFailure && statuses.every((status) => status === 'FAILED') && statuses.length <= node.retryCap
+      : node.status === 'RUNNING' ? !hasTerminalUsageFailure && last === 'RUNNING' && statuses.slice(0, -1).every((status) => status === 'FAILED')
+        : node.status === 'SUCCEEDED' ? !hasTerminalUsageFailure && last === 'SUCCEEDED' && statuses.slice(0, -1).every((status) => status === 'FAILED')
+          : statuses.every((status) => status === 'FAILED') && ((!hasTerminalUsageFailure && statuses.length === node.retryCap + 1) || terminalUsageFailureIndex === node.attempts.length - 1);
+    if (!consistent || node.attempts.length > node.retryCap + 1) fail('ATTEMPT_LEDGER_INVALID');
+  }
+  for (const [nodeId, node] of Object.entries(state.nodes)) {
+    if (node.attempts.length > 0 && contracts.get(nodeId).dependsOn.some((dependency) => state.nodes[dependency]?.status !== 'SUCCEEDED')) fail('ATTEMPT_LEDGER_INVALID');
+  }
+  return state;
+}
+function withLedgerLock(file, plan, callback, planMismatchCode = 'ATTEMPT_LEDGER_INVALID') {
+  const absolute = path.resolve(file), lock = `${absolute}.lock`; fs.mkdirSync(path.dirname(absolute), { recursive: true }); acquireAttemptLedgerLock(lock, plan.planDigest, absolute);
   try {
     let state;
     try { state = fs.existsSync(absolute) ? JSON.parse(fs.readFileSync(absolute, 'utf8')) : undefined; }
     catch { fail('ATTEMPT_LEDGER_INVALID'); }
+    if (state !== undefined) {
+      if (state?.planDigest !== plan.planDigest) fail(planMismatchCode);
+      validateAttemptLedger(state, plan);
+    }
     const result = callback(state); journalWrite(absolute, result.state); return result.value;
   }
-  finally { fs.rmdirSync(lock); }
+  finally { fs.rmSync(path.join(lock, 'owner.json')); fs.rmdirSync(lock); }
 }
 function authoritativeNode(plan, nodeId) {
   if (!plan || typeof plan !== 'object' || plan.planDigest !== canonicalHash(Object.fromEntries(Object.entries(plan).filter(([key]) => key !== 'planDigest'))) || !Array.isArray(plan.nodes)) fail('ATTEMPT_PLAN_INVALID');
@@ -420,9 +480,10 @@ export function beginNodeAttempt(args) {
   const { ledgerPath, plan, nodeId, attemptId = randomUUID() } = args;
   const contract = authoritativeNode(plan, nodeId), retryCap = contract.retryCap;
   if (typeof nodeId !== 'string' || !nodeId || typeof attemptId !== 'string' || !attemptId) fail('ATTEMPT_INVALID');
-  return withLedgerLock(ledgerPath, (current) => {
+  return withLedgerLock(ledgerPath, plan, (current) => {
     const state = current ?? { schemaVersion: ATTEMPT_LEDGER_SCHEMA_VERSION, planDigest: plan.planDigest, nodes: {} };
-    if (!ownKeys(state, ['schemaVersion', 'planDigest', 'nodes']) || state.schemaVersion !== ATTEMPT_LEDGER_SCHEMA_VERSION || state.planDigest !== plan.planDigest || !state.nodes || typeof state.nodes !== 'object' || Array.isArray(state.nodes)) fail('ATTEMPT_LEDGER_INVALID');
+    validateAttemptLedger(state, plan);
+    if (contract.dependsOn.some((dependency) => state.nodes[dependency]?.status !== 'SUCCEEDED')) fail('ATTEMPT_DEPENDENCIES_INCOMPLETE');
     const node = state.nodes[nodeId] ?? { retryCap, status: 'READY', attempts: [] };
     if (node.retryCap !== retryCap) fail('RETRY_CAP_MUTATED');
     if (node.status === 'RUNNING') fail('ATTEMPT_ALREADY_RUNNING');
@@ -436,28 +497,38 @@ export function beginNodeAttempt(args) {
 export const beginAttempt = beginNodeAttempt;
 export function completeNodeAttempt({ ledgerPath, plan, nodeId, attemptId, resultDigest, outcome }) {
   authoritativeNode(plan, nodeId);
-  if (!DIGEST.test(resultDigest ?? '') || !['succeeded', 'failed'].includes(outcome)) fail('ATTEMPT_RESULT_INVALID');
-  return withLedgerLock(ledgerPath, (state) => {
+  if (!DIGEST.test(resultDigest ?? '') || !['succeeded', 'failed', 'budget_exceeded', 'usage_unobserved'].includes(outcome)) fail('ATTEMPT_RESULT_INVALID');
+  return withLedgerLock(ledgerPath, plan, (state) => {
     if (state?.planDigest !== plan.planDigest) fail('ATTEMPT_PLAN_MISMATCH');
     const node = state?.nodes?.[nodeId], attempt = node?.attempts?.find((item) => item.attemptId === attemptId);
     if (!node || node.status !== 'RUNNING' || !attempt || attempt.status !== 'RUNNING') fail('ATTEMPT_NOT_RUNNING');
     if (Object.values(state.nodes).some((entry) => entry.attempts?.some((item) => item.resultDigest === resultDigest))) fail('RESULT_DIGEST_REPLAY');
     attempt.status = outcome === 'succeeded' ? 'SUCCEEDED' : 'FAILED'; attempt.resultDigest = resultDigest;
-    node.status = outcome === 'succeeded' ? 'SUCCEEDED' : (node.attempts.length >= node.retryCap + 1 ? 'ESCALATED' : 'READY');
+    if (['budget_exceeded', 'usage_unobserved'].includes(outcome)) attempt.failureReason = outcome;
+    node.status = outcome === 'succeeded' ? 'SUCCEEDED' : (['budget_exceeded', 'usage_unobserved'].includes(outcome) || node.attempts.length >= node.retryCap + 1 ? 'ESCALATED' : 'READY');
     return { state, value: freeze({ nodeId, attemptId, status: node.status, attempts: node.attempts.length }) };
-  });
+  }, 'ATTEMPT_PLAN_MISMATCH');
 }
 export const completeAttempt = completeNodeAttempt;
-export function readAttemptLedger(ledgerPath) { try { return JSON.parse(fs.readFileSync(path.resolve(ledgerPath), 'utf8')); } catch { fail('ATTEMPT_LEDGER_INVALID'); } }
+export function readAttemptLedger(ledgerPath, plan) {
+  let state; try { state = JSON.parse(fs.readFileSync(path.resolve(ledgerPath), 'utf8')); } catch { fail('ATTEMPT_LEDGER_INVALID'); }
+  if (plan !== undefined) {
+    if (!plan || typeof plan !== 'object' || plan.planDigest !== canonicalHash(Object.fromEntries(Object.entries(plan).filter(([key]) => key !== 'planDigest'))) || !Array.isArray(plan.nodes)) fail('ATTEMPT_PLAN_INVALID');
+    validateAttemptLedger(state, plan);
+  }
+  return state;
+}
 
-export function compareObservedGraph({ blueprint, policy, observedGraph }) {
+function compareGraph({ blueprint, policy, observedGraph }, phase) {
   validateBlueprint(blueprint, policy);
   const graphObject = observedGraph && typeof observedGraph === 'object' && !Array.isArray(observedGraph);
   const hasEdges = graphObject && Object.hasOwn(observedGraph, 'edges');
   const hasLinks = graphObject && Object.hasOwn(observedGraph, 'links');
-  const nativeGraphify = hasLinks;
+  const rawGraphifyKeys = ['nodes', 'edges', 'hyperedges', 'input_tokens', 'output_tokens'];
+  const rawGraphify = graphObject && hasEdges && !hasLinks && !Object.hasOwn(observedGraph, 'directed') && !Object.hasOwn(observedGraph, 'edgeDirection') && rawGraphifyKeys.every((key) => Object.hasOwn(observedGraph, key)) && Object.keys(observedGraph).every((key) => rawGraphifyKeys.includes(key)) && Array.isArray(observedGraph.hyperedges) && Number.isFinite(observedGraph.input_tokens) && observedGraph.input_tokens >= 0 && Number.isFinite(observedGraph.output_tokens) && observedGraph.output_tokens >= 0;
+  const nativeGraphify = hasLinks || rawGraphify;
   const directionValid = graphObject && (nativeGraphify
-    ? typeof observedGraph.directed === 'boolean'
+    ? (rawGraphify || typeof observedGraph.directed === 'boolean')
     : observedGraph.directed === true && observedGraph.edgeDirection === blueprint.graphPolicy.edgeDirection);
   if (!graphObject || !directionValid || (Object.hasOwn(observedGraph, 'edgeDirection') && observedGraph.edgeDirection !== blueprint.graphPolicy.edgeDirection) || !Array.isArray(observedGraph.nodes) || hasEdges === hasLinks) fail('OBSERVED_GRAPH_INVALID');
   const observedEdges = hasLinks ? observedGraph.links : observedGraph.edges;
@@ -475,7 +546,7 @@ export function compareObservedGraph({ blueprint, policy, observedGraph }) {
     if (mappedSource !== undefined && mappedSource !== node.source_file) errors.push({ code: 'DUPLICATE_SOURCE_MAPPING', source: node.source_file }); else mapped.set(key, node.source_file);
     if (declared.has(key) && declared.get(key) !== node.source_file) errors.push({ code: 'DUPLICATE_SOURCE_MAPPING', source: node.source_file });
     if (declared.has(key)) nodeFiles.set(node.id, declared.get(key));
-    if (!declared.has(key)) errors.push({ code: 'UNEXPECTED_SOURCE_FILE', source: node.source_file });
+    if (!declared.has(key) && phase === undefined) errors.push({ code: 'UNEXPECTED_SOURCE_FILE', source: node.source_file });
   }
   for (const [key, source] of declared) if (!mapped.has(key)) errors.push({ code: 'DECLARED_FILE_MISSING', source });
   const expected = new Set(); for (const file of blueprint.files) for (const dep of file.dependsOn) expected.add(`${portableKey(file.path)}->${portableKey(dep)}`);
@@ -496,10 +567,18 @@ export function compareObservedGraph({ blueprint, policy, observedGraph }) {
       if (sourceKey !== targetKey) actual.add(`${sourceKey}->${targetKey}`);
     } catch { errors.push({ code: 'EDGE_SOURCE_INVALID' }); }
   }
-  const missingEdges = [...expected].filter((edge) => !actual.has(edge)).sort(), unexpectedEdges = [...actual].filter((edge) => !expected.has(edge)).sort();
-  const body = { schemaVersion: OBSERVED_GRAPH_REPORT_VERSION, direction: 'source-depends-on-target', matches: errors.length === 0 && missingEdges.length === 0 && unexpectedEdges.length === 0, missingEdges, unexpectedEdges, errors: errors.sort((a, b) => canonicalJson(a).localeCompare(canonicalJson(b))) };
+  const missingEdges = phase === 'structure' ? [] : [...expected].filter((edge) => !actual.has(edge)).sort();
+  const unexpectedEdges = phase === 'structure' ? [] : [...actual].filter((edge) => !expected.has(edge)).sort();
+  const body = { schemaVersion: OBSERVED_GRAPH_REPORT_VERSION, ...(phase === undefined ? {} : { phase }), direction: 'source-depends-on-target', matches: errors.length === 0 && missingEdges.length === 0 && unexpectedEdges.length === 0, missingEdges, unexpectedEdges, errors: errors.sort((a, b) => canonicalJson(a).localeCompare(canonicalJson(b))) };
   return freeze({ ...body, reportDigest: canonicalHash(body) });
 }
+export function compareObservedGraph(args) { return compareGraph(args); }
+export function compareObservedGraphPhase(args) {
+  if (!args || !['structure', 'dependencies'].includes(args.phase)) fail('OBSERVED_GRAPH_PHASE_INVALID');
+  return compareGraph(args, args.phase);
+}
+export const compareScaffoldGraph = compareObservedGraphPhase;
+export const comparePhasedObservedGraph = compareObservedGraphPhase;
 export const compareDeclaredToObserved = compareObservedGraph;
 export function compareObservedGraphFile({ blueprint, policy, graphPath }) {
   let observedGraph; try { observedGraph = JSON.parse(fs.readFileSync(graphPath, 'utf8')); } catch { fail('OBSERVED_GRAPH_UNREADABLE'); }

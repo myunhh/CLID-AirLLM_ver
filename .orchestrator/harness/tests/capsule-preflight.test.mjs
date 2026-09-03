@@ -21,6 +21,14 @@ test('preflight rejects unowned and overlapping writes before execution', () => 
     assert.throws(() => preflightCapsules({ capsuleDir: one, parallelCapsuleDirs: [two] }), { code: 'PARALLEL_WRITE_OVERLAP' });
   } finally { fs.rmSync(root, { recursive: true, force: true }); }
 });
+test('preflight rejects ancestor and descendant peer write overlap', () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'ecc-preflight-'));
+  try {
+    const one = path.join(root, 'one'); const two = path.join(root, 'two'); const directory = path.join(root, 'owned');
+    capsule(one, [directory], [root], root); capsule(two, [path.join(directory, 'child.mjs')], [root], root);
+    assert.throws(() => preflightCapsules({ capsuleDir: one, parallelCapsuleDirs: [two] }), { code: 'PARALLEL_WRITE_OVERLAP' });
+  } finally { fs.rmSync(root, { recursive: true, force: true }); }
+});
 test('preflight rejects unapproved or forbidden reads and forbidden writes', () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'ecc-preflight-'));
   try {

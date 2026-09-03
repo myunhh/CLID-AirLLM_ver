@@ -32,6 +32,7 @@ test('harness documentation declares canonical runtime, launcher-only Python, an
   assert.match(readme, /bridge-launcher\.mjs/u);
   assert.match(readme, /snapshot.*install.*verify.*restore/is);
   assert.match(readme, /never.*ambient Python/is);
+  assert.equal(fs.existsSync(path.join(root, 'graphify-out')), false, 'global harness root must not contain graphify-out');
 });
 
 test('canonical directory map covers repository planes and its narrow entrypoints link back', () => {
@@ -125,7 +126,7 @@ test('catalogs, directories, provenance, and rollback records agree dynamically'
 test('runtime source stays separate from the capability-selection plane', () => {
   const map = read('docs', 'HARNESS-DIRECTORY-STRUCTURE.md');
   const skillGuide = read('.skills', 'README.md');
-  const forbiddenRuntimeReferences = /(?:\.skills[\\/]|plugin-catalog\.json|openai-curated-remote|myunhh\.pem|graphify-out)/iu;
+  const forbiddenRuntimeReferences = /(?:\.skills[\\/]|plugin-catalog\.json|openai-curated-remote|myunhh\.pem)/iu;
   assert.match(map, /only project-owned runtime/iu);
   assert.match(skillGuide, /not the orchestration\s+runtime/iu);
   for (const sourceFile of runtimeSourceFiles(path.join(root, '.orchestrator', 'harness'))) {

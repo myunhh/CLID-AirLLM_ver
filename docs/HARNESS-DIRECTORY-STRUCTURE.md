@@ -85,10 +85,12 @@ writes, or external mutations.
 owns DAG validation, admission, event storage, event verification, and Judge
 receipt handling. `bridge-launcher.mjs` selects the Python interpreter for the
 launcher-only Bridge facade; Python execution goes through that launcher.
-The local `profiles/fast-v1.json`, `command-worker.mjs`, and `token-audit.mjs`
+The local standard/fast profiles, `command-worker.mjs`, and `token-audit.mjs`
 provide requested/observed execution metadata, preflighted command-only
-handoffs, and content-free provider usage accounting. They neither import
-external profiles nor change the four admission capacity dimensions.
+handoffs, and content-free provider usage accounting. Ordinary execution is the
+default; accelerated mode requires an explicit request. These components
+neither import external profiles nor change the four admission capacity
+dimensions.
 
 `.orchestrator/kernel-bridge/` is a compatibility plane, not a second runtime.
 Its legacy entry points delegate to the canonical harness after the reversible
@@ -112,9 +114,15 @@ into a dry-run plan and later materialize concise product stubs plus detailed
 contract sidecars under that target's
 `.orchestrator/blueprints/<blueprint-id>/`. This optional target-project output
 is not a second runtime and is intentionally absent from this global harness
-source tree. Its execution graph and maximum-safe waves schedule approved work;
-the host agent runtime performs model dispatch. An observed source graph stays
-separate and is supplied explicitly for declared-versus-observed comparison.
+source tree. Its execution graph and maximum-safe waves schedule approved work.
+The manual stage lane leaves model dispatch and an observed source graph to the
+host. The optional automated lane uses trusted executable configuration to run
+a structural Graphify gate, command-only product-file workers, deterministic
+verification/retry with node-local prior evidence, and a final dependency
+Graphify gate. Its fresh graph and
+provider transport artifacts stay below a trusted plan directory that resolves
+outside the target workspace, not in this global harness source tree. The
+manual stage lane keeps its existing in-workspace plan option.
 
 ## Execution state and evidence
 
@@ -134,7 +142,7 @@ request
   -> AGENTS.md policy and working-tree/ownership checks
   -> DAILY kernel; targeted catalog lookup only when needed
   -> read-only: deterministic collection and preflighted parallel commands
-  -> mutation/gated: trusted blueprint review, scaffold plan, approved DAG, capsules, and centralized integration
+  -> mutation/gated: trusted blueprint review, scaffold plan, structural graph gate, approved DAG waves, verification, and dependency graph gate
   -> Bridge through bridge-launcher.mjs when Python work is required
   -> content-free usage sidecar plus append-only events when requested
   -> one final Judge, or receipt-bound per-node Judge for the governed lane

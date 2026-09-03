@@ -1,0 +1,11 @@
+{
+  "version": "standard-v1",
+  "fast": false,
+  "reasoning": "low",
+  "model": null,
+  "constraints": {
+    "modelCallLimit": null,
+    "allowPlanning": false,
+    "allowDelegation": false
+  }
+}
