@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "blueprint-review-receipt-v1.schema.json",
+  "title": "Blueprint review receipt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "blueprintDigest", "policyDigest", "quorumDigest", "judgeId", "nonce", "outcome", "findingsArtifactRef", "findingsDigest"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "blueprintDigest": { "$ref": "#/$defs/digest" },
+    "policyDigest": { "$ref": "#/$defs/digest" },
+    "quorumDigest": { "$ref": "#/$defs/digest" },
+    "judgeId": { "type": "string", "minLength": 1 },
+    "nonce": { "type": "string", "minLength": 1 },
+    "outcome": { "const": "approve" },
+    "findingsArtifactRef": { "type": "string", "minLength": 1, "pattern": "^(?![/\\\\])(?!.*(?:^|/)\\.{1,2}(?:/|$))(?!.*\\\\).+$" },
+    "findingsDigest": { "$ref": "#/$defs/digest" }
+  },
+  "$defs": {
+    "digest": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+  }
+}

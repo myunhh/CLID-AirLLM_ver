@@ -15,6 +15,7 @@ const commands = {
     [node, ['--test', '.orchestrator/harness/tests/bridge-launcher.test.mjs']], [node, ['.orchestrator/harness/bridge-launcher.mjs', 'run-tests']],
     [node, ['--test', '.agents/skills/teammode/tests/team-state.test.mjs']], [node, ['--test', '.orchestrator/harness/tests/config-contract.test.mjs']],
     [node, ['--test', '.orchestrator/harness/tests/docs-contract.test.mjs']],
+    [node, ['--test', '.orchestrator/harness/tests/blueprint-scaffold.test.mjs']],
     [node, ['.orchestrator/harness/shim-cutover.mjs', 'test']],
   ],
   'controller-bridge-chain': [[node, ['--test', '.orchestrator/harness/tests/integration.test.mjs']]],
@@ -24,6 +25,7 @@ const commands = {
   budgets: [[node, ['--test', '.orchestrator/harness/tests/admission-budget.test.mjs']]],
   'team-lifecycle': [[node, ['--test', '.agents/skills/teammode/tests/team-state.test.mjs']]],
   'runtime-isolation': [[node, ['--test', '.orchestrator/harness/tests/clean-checkout.test.mjs']]],
+  'virtual-scaffold': [[node, ['--test', '.orchestrator/harness/tests/blueprint-scaffold.test.mjs']]],
 };
 const flag = process.argv[2]; const key = flag === '--phase' || flag === '--case' ? process.argv[3] : undefined;
 if (!commands[key]) { console.error('USAGE: acceptance.mjs --phase canonical | --case <name>'); process.exitCode = 2; }

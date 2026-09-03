@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "blueprint-v1.schema.json",
+  "title": "Contract-first scaffold blueprint v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "blueprintId", "classification", "ambiguitySignals", "builders", "judges", "defaultBudget", "graphPolicy", "files"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "blueprintId": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$" },
+    "classification": { "enum": ["S", "M", "L", "XL"] },
+    "ambiguitySignals": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+    "builders": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+    "judges": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+    "defaultBudget": { "$ref": "#/$defs/budget" },
+    "graphPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["directed", "edgeDirection"],
+      "properties": {
+        "directed": { "const": true },
+        "edgeDirection": { "const": "source-depends-on-target" }
+      }
+    },
+    "files": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path", "dependsOn", "builderId", "contract", "instructions", "stub"],
+        "properties": {
+          "path": { "type": "string", "minLength": 1 },
+          "dependsOn": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+          "builderId": { "type": "string", "minLength": 1 },
+          "retryCap": { "type": "integer", "minimum": 0 },
+          "contract": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["purpose", "exports", "acceptance"],
+            "properties": {
+              "purpose": { "type": "string", "minLength": 1 },
+              "exports": { "type": "array", "items": { "type": "string" } },
+              "acceptance": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } }
+            }
+          },
+          "instructions": { "type": "string", "minLength": 1 },
+          "stub": { "type": "string", "pattern": "IMPLEMENTATION_REQUIRED" },
+          "budget": { "$ref": "#/$defs/budget" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "budget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tokens", "toolCalls", "wallSeconds", "processes"],
+      "properties": {
+        "tokens": { "type": "integer", "minimum": 1 },
+        "toolCalls": { "type": "integer", "minimum": 1 },
+        "wallSeconds": { "type": "integer", "minimum": 1 },
+        "processes": { "type": "integer", "minimum": 1 }
+      }
+    }
+  }
+}

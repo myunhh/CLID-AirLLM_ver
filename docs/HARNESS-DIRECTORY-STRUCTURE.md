@@ -107,6 +107,15 @@ portable runtime component or authorization for credentials or network writes.
 The routing plane selects how agents are configured, while
 `.orchestrator/harness/` executes the approved work graph.
 
+For target-project creation work, the harness can compile a reviewed blueprint
+into a dry-run plan and later materialize concise product stubs plus detailed
+contract sidecars under that target's
+`.orchestrator/blueprints/<blueprint-id>/`. This optional target-project output
+is not a second runtime and is intentionally absent from this global harness
+source tree. Its execution graph and maximum-safe waves schedule approved work;
+the host agent runtime performs model dispatch. An observed source graph stays
+separate and is supplied explicitly for declared-versus-observed comparison.
+
 ## Execution state and evidence
 
 `.orchestrator/definitions/` holds reusable approved DAG definitions.
@@ -125,7 +134,7 @@ request
   -> AGENTS.md policy and working-tree/ownership checks
   -> DAILY kernel; targeted catalog lookup only when needed
   -> read-only: deterministic collection and preflighted parallel commands
-  -> mutation/gated: approved DAG, capsules, and centralized integration
+  -> mutation/gated: trusted blueprint review, scaffold plan, approved DAG, capsules, and centralized integration
   -> Bridge through bridge-launcher.mjs when Python work is required
   -> content-free usage sidecar plus append-only events when requested
   -> one final Judge, or receipt-bound per-node Judge for the governed lane
